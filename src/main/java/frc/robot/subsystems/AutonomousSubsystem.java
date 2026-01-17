@@ -1,0 +1,403 @@
+package frc.robot.subsystems;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.libraries.ConsoleAuto;
+
+// Something interesting I found was DriverStation.getMatchTime() It returns how much time is left, might be useful.
+
+public class AutonomousSubsystem extends SubsystemBase{
+
+  // limited by the rotary switch settings of 6 and POV max of 8.
+  public enum AutoPlan {
+    DRIVEOUT,
+    CENTER,
+    LEFT,
+    RIGHT
+    ;
+
+    /*public String getSelectName() {
+        return this.toString();
+    }
+
+    public int getSelectIx() {
+        return this.ordinal();
+    }
+        */
+  }
+
+  /*
+   * AutoStep details the steps and step parameters available for auto
+   * 
+   * parameters
+   * stepCmd: step structure or what type of command
+   * waitTime: wait time in seconds for wait commands
+   * Switch True: switch number that will turn on this step if true
+   * Switch False: switch number that will turn off this step if true
+   * 
+   * tbd - auto or path names to coordinate with PathPlanner routines
+   * for 2025 the first path must be an Auto that sets the starting pose 
+   * after that they should be paths only
+   */
+  public enum AutoStep {
+    WAIT1("Wait", 1.0),
+    WAIT2("Wait", 2.0),
+    WAITLOOP("Wait", 99.9),
+    DRIVE_LEFT_TRENCH("Drive Plan", "drive left trench"),
+    DRIVE_CENTER_CLIMB("Drive Plan", "drive center climb"),
+    SHOOT_LONG("Shoot" , "long"),
+    DRIVE_RIGHT_TRENCH("Drive Plan" , "drive right trench"),
+    SHOOT_SHORT("Shoot" , "short")
+    ;
+
+    private final String m_cmdType;
+    private final double m_waitTime;
+    private final String m_actionName;
+
+    private AutoStep(String cmdType) {
+      this.m_cmdType = cmdType;
+      this.m_actionName = "";
+      this.m_waitTime = 0.0;
+    }
+
+    private AutoStep(String cmdType, double waitTime) {
+      this.m_cmdType = cmdType;
+      this.m_waitTime = waitTime;
+      this.m_actionName = "";
+    }
+
+    private AutoStep(String cmdType, String actionName) {
+      this.m_cmdType = cmdType;
+      this.m_waitTime = 0.0;
+      this.m_actionName = actionName;
+    }
+
+    private AutoStep(String cmdType, double waitTime, String actionName) {
+      this.m_cmdType = cmdType;
+      this.m_waitTime = waitTime;
+      this.m_actionName = actionName;
+    }
+
+    public String getCmdType() {
+      return m_cmdType;
+    }
+
+    public double getWaitTIme() {
+      return m_waitTime;
+    }
+
+    public String getActionName() {
+      return m_actionName;
+    }
+  }
+
+  /*
+   * class to associate the step with switches
+   * for the step to be selected,
+   * the True switch must be on (true)
+   * the False switch must be off (false)
+   * 
+   * The False switch is there to provide two path options 
+   * e.g. step 3 and step 5 are mutually exclusive, to one switch is selecting between them
+   * 
+   */
+  private class PlanStep{
+    private AutoStep m_autoStep;
+    private int m_switchTrue;
+    private int m_switchFalse;
+
+    public PlanStep(AutoStep autoStep) {
+      this.m_autoStep = autoStep;
+      this.m_switchTrue = 0;
+      this.m_switchFalse = 0;
+    }
+
+    public PlanStep(AutoStep autoStep, int switchTrue) {
+      this.m_autoStep = autoStep;
+      this.m_switchTrue = switchTrue;
+      this.m_switchFalse = 0;
+    }
+
+    public PlanStep(AutoStep autoStep, int switchTrue, int switchFalse) {
+      this.m_autoStep = autoStep;
+      this.m_switchTrue = switchTrue;
+      this.m_switchFalse = switchFalse;
+    }
+
+    public AutoStep getAutoStep() {
+      return m_autoStep;
+    }
+
+    public int getASwitch() {
+      return m_switchTrue;
+    }
+
+    public int getBSwitch() {
+      return m_switchFalse;
+    }
+
+  }
+
+  // save for passed in control box and subsystems
+  ConsoleAuto m_ConsoleAuto;
+  RobotContainer m_robotContainer;
+  DriveSubsystem m_drive;
+  ClimberSubsystem m_climber;
+  ShooterSubsystem m_shooter;
+  IntakeSubsystem m_intake;
+
+  // work for plan selection
+  AutoPlan m_autoPlans[] = AutoPlan.values();
+  AutoPlan m_selectedPlan;
+
+  private String m_selectedPlanName = "n/a";
+  private int m_iWaitCount;
+
+  // work for plan steps for current plan selection
+  // used in dashboard display for step selection
+  private int kSTEP_MAX = 12;
+  private PlanStep[] m_autoStep = new PlanStep[kSTEP_MAX];
+  private String[] m_strStepList = new String[kSTEP_MAX];
+  private String[] m_strStepSwitch = new String[kSTEP_MAX];
+  private boolean[] m_bStepSWList = new boolean[kSTEP_MAX];
+
+
+  private int m_iPatternSelect;
+
+  private PlanStep[][] m_planSteps;
+
+  // constructor
+  /*
+   * pass in the control box and required subsystems
+   * 
+   */
+  public AutonomousSubsystem(ConsoleAuto consoleAuto,
+        RobotContainer robotContainer,
+        DriveSubsystem drive,
+        ShooterSubsystem shooter,
+        IntakeSubsystem intake,
+        ClimberSubsystem climber) {
+
+    m_ConsoleAuto = consoleAuto;
+    m_robotContainer = robotContainer;
+    m_drive = drive;
+    m_climber = climber;
+    m_intake = intake;
+    m_shooter = shooter;
+    m_selectedPlan = m_autoPlans[0];
+    m_selectedPlanName = m_selectedPlan.toString();
+    m_iPatternSelect = 0;
+
+    // set up dashboard display
+    for (int iat = 0; iat < kSTEP_MAX; iat++) {
+      initStepList(iat);
+      fmtDisplay(iat);
+    }
+  
+/*
+ *  CRITICAL PIECE
+ * This two dimensional array defines the steps for each selectable Auto Plan
+ * First dimension is set by the ConsoleAuto selector switch (passed in via POV 0)
+ * Second dimension is the sequence of the possible step(s) for the pattern
+ * 
+ * data elements are from the AutoStep ENUM of steps, run if true switch, and run if false switch
+ * the switch numbers are optional, although if the false one is used, then the true is required
+ * 
+ */
+    m_planSteps = new PlanStep[][] {
+      //DRIVE OUT
+          {new PlanStep(AutoStep.WAITLOOP),
+           new PlanStep(AutoStep.SHOOT_LONG , 1)
+          },  
+      //CENTER
+          {new PlanStep(AutoStep.WAITLOOP), 
+            new PlanStep(AutoStep.SHOOT_SHORT , 1), 
+            new PlanStep(AutoStep.DRIVE_CENTER_CLIMB , 2)
+          },
+      //LEFT
+          {new PlanStep(AutoStep.WAITLOOP),
+             new PlanStep(AutoStep.SHOOT_LONG, 1),
+             new PlanStep(AutoStep.DRIVE_LEFT_TRENCH, 2)
+          },
+      //RIGHT
+          {new PlanStep(AutoStep.WAITLOOP),
+            new PlanStep(AutoStep.SHOOT_SHORT , 1),
+            new PlanStep(AutoStep.DRIVE_RIGHT_TRENCH , 2)
+          }
+    };
+
+    if (m_autoStep.length < m_planSteps.length ) {
+      System.out.println("WARNING - Auto Commands LT Command Steps");
+    }
+    // more? like more commands than supported by the switch
+    // printline means a discrepancy in the auto steps selected
+  }
+
+  private void fmtDisplay(int ix) {
+  
+    String labelName = "Step " + ix;
+
+    labelName = "Step " + ix;
+    SmartDashboard.putString(labelName, m_strStepList[ix]);
+
+    labelName = "Switch(es) " + ix;
+    SmartDashboard.putString(labelName, m_strStepSwitch[ix]);
+
+    labelName = "SwState " + ix;
+    SmartDashboard.putBoolean(labelName, m_bStepSWList[ix]);
+  
+  }
+
+  private void initStepList(int ix) {
+      m_strStepList[ix] = "";
+      m_strStepSwitch[ix] = "";
+      m_bStepSWList[ix] = false;
+  }
+
+  @Override
+  public void periodic() {
+  // This method will be called once per scheduler run
+    SmartDashboard.putString("Selected Pattern", m_selectedPlanName);
+    SmartDashboard.putNumber("WaitLoop", m_iWaitCount);
+    for (int iat = 0; iat < kSTEP_MAX; iat++) {
+      fmtDisplay(iat);
+    }
+  }
+   
+/*
+ * method to handle building the plan step selection
+ * called by command running while disabled
+ * 
+ * saves the possible steps for the selected AutoPlan
+ * tests true/false switches to set step selection
+ * 
+ */
+  public void selectAutoCommand() {
+
+    m_iPatternSelect = m_ConsoleAuto.getROT_SW_0();
+    if (m_iPatternSelect >= m_planSteps.length) {
+      m_iPatternSelect = 0;
+    }
+
+    m_selectedPlan = m_autoPlans[m_iPatternSelect];
+    m_selectedPlanName = m_selectedPlan.toString();
+
+    m_iWaitCount = m_ConsoleAuto.getROT_SW_1();
+
+    // save the possible step list for the selected pattern to a work list
+    for (int ix = 0; ix < m_planSteps[m_iPatternSelect].length; ix++) {
+      m_autoStep[ix] = m_planSteps[m_iPatternSelect][ix];
+      m_strStepList[ix] = m_autoStep[ix].getAutoStep().name();
+      m_strStepSwitch[ix] = getStepSwitch(m_autoStep[ix]);
+      m_bStepSWList[ix] = getStepBoolean(m_autoStep[ix]);
+    }
+    for (int ix = m_planSteps[m_iPatternSelect].length; ix < kSTEP_MAX; ix++) {
+      initStepList(ix);
+    }
+
+  }
+
+  /*
+   * return a string value of the true/false switches for the step
+   * used to display on the dashboard for reference
+   */
+  private String getStepSwitch(PlanStep stepName) {
+    String stepSwName = "";
+    int stepSwitch = stepName.getASwitch();
+    if (stepSwitch > 0) {
+      stepSwName = String.valueOf(stepSwitch);
+    }
+    stepSwitch = stepName.getBSwitch();
+    if (stepSwitch > 0) {
+      stepSwName = stepSwName + " & !" + String.valueOf(stepSwitch);
+    }
+    return stepSwName;
+  }
+    
+  /*
+   * return true/false for step selection based on switch settings
+   */
+  private boolean getStepBoolean(PlanStep stepName) {
+    boolean stepBool = true;
+    int stepSwitch = stepName.getASwitch();
+    if (stepSwitch > 0) {
+      stepBool = m_ConsoleAuto.getButton(stepSwitch);
+    }
+    stepSwitch = stepName.getBSwitch();
+    if (stepSwitch > 0) {
+      stepBool = stepBool & !m_ConsoleAuto.getButton(stepSwitch);
+    }
+    return stepBool;
+  }
+
+
+  /*
+   * Command to run the Auto selection process with Operator Console interaction
+   * This should be handled by a trigger that is started on Disabled status
+   */
+  public Command selectAuto() {
+    return Commands.run(this::selectAutoCommand, this)
+          .ignoringDisable(true);
+  }
+
+  /*
+   * Command to process the selected command list
+   * 
+   * creates a sequential command group of all selected commands for the auto pattern
+   * returns the group 
+   * 
+  */
+  public Command runAuto() {
+
+    SequentialCommandGroup autoCmd = new SequentialCommandGroup();
+
+    for (int ix = 0; ix < m_planSteps[m_iPatternSelect].length; ix++) {
+      if (m_bStepSWList[ix]) {
+        //System.out.print("Selected command " + ix);
+        //System.out.println("-" + m_strStepList[ix]);
+        autoCmd.addCommands(Commands.print("Starting: " + m_strStepList[ix]));
+        autoCmd.addCommands(autoStepCmd(m_autoStep[ix].getAutoStep()));
+        autoCmd.addCommands(Commands.print("Just completed: " + m_strStepList[ix]));
+      }
+    }
+
+    return autoCmd;
+   
+  }
+
+  /*
+   * Return the Command for each selected step
+   * 
+   */
+  private Command autoStepCmd(AutoStep autoStep) {
+
+    Command workCmd = Commands.print("command not found for " + autoStep.name());
+    switch (autoStep.getCmdType()) {
+      case "Wait":
+        double waitTime = autoStep.getWaitTIme();
+        System.out.println("Wait time " + autoStep.getWaitTIme());
+        if (waitTime == 99.9) {
+          workCmd = Commands.waitSeconds(m_ConsoleAuto.getROT_SW_1());
+        } else {
+          workCmd = Commands.waitSeconds(waitTime);
+        }
+
+        break;
+      case "Drive Plan":
+        workCmd =  m_drive.getPathStep(autoStep.getActionName());
+        break;
+      case "Shoot":
+        // build sequence to raise elevator, move hand up, and wait until elevator is in position
+        workCmd = m_shooter.shoot();
+        break;
+      default:
+        break;
+    }
+    return workCmd;
+  }
+  
+}
