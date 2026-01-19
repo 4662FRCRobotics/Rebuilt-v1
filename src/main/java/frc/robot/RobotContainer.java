@@ -5,6 +5,8 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.libraries.ConsoleAuto;
+import frc.robot.subsystems.AutonomousSubsystem;
 import frc.robot.subsystems.CameraApriltag;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
@@ -13,9 +15,11 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.CameraApriltag.CameraName;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -29,14 +33,18 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
+  //private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
   private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem();
   private final IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem();
   private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem();
   private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem();
+  private final ConsoleAuto m_ConsoleAuto = new ConsoleAuto(OperatorConstants.kAutoConsolePort);
+  private final AutonomousSubsystem m_AutonomousSubsystem = new AutonomousSubsystem(m_ConsoleAuto, this, m_DriveSubsystem, m_ShooterSubsystem, m_IntakeSubsystem, m_ClimberSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
+  
+  private static boolean m_runAutoConsole;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -71,6 +79,23 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+
+         runAutoConsoleFalse();
+    //new Trigger(DriverStation::isDisabled)
+    //new Trigger(RobotModeTriggers.disabled())
+    new Trigger(trgAutoSelect())
+      .whileTrue(m_AutonomousSubsystem.selectAuto());
+    runAutoConsoleTrue();
+
+    new Trigger(RobotModeTriggers.disabled())
+      .onTrue(Commands.runOnce(this::runAutoConsoleTrue)
+        .ignoringDisable(true))
+      ;
+
+    new Trigger(RobotModeTriggers.disabled())
+    .onFalse(Commands.runOnce(this::runAutoConsoleFalse))
+    ;
+
     m_driverController.x()
         .whileTrue(new RunCommand(
             () -> m_DriveSubsystem.setX(),
@@ -101,6 +126,19 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return m_AutonomousSubsystem.runAuto();
+  }
+
+  private static Trigger trgAutoSelect() {
+    //System.out.println("bool auto console" + m_runAutoConsole);
+    return new Trigger(() -> m_runAutoConsole);
+  }
+
+  private void runAutoConsoleTrue() {
+    m_runAutoConsole = true;
+  }
+
+  private void runAutoConsoleFalse() {
+    m_runAutoConsole = false;
   }
 }
