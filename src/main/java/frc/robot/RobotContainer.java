@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -44,6 +45,9 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
   
+  private final CommandGenericHID m_ConsoleTeleop = 
+    new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+  
   private static boolean m_runAutoConsole;
 
   /**
@@ -60,7 +64,7 @@ public class RobotContainer {
                 -MathUtil.applyDeadband(m_driverController.getLeftY(), OperatorConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getLeftX(), OperatorConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
-                false),
+                m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
             m_DriveSubsystem));
   }
 
@@ -101,10 +105,10 @@ public class RobotContainer {
             () -> m_DriveSubsystem.setX(),
             m_DriveSubsystem));
 
-    m_driverController.y()
+   /*  m_driverController.y()
         .onTrue(new InstantCommand(
             () -> m_DriveSubsystem.zeroHeading(),
-            m_DriveSubsystem));
+            m_DriveSubsystem));*/
 
     m_driverController.leftTrigger()
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));

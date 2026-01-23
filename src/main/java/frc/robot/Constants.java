@@ -80,6 +80,8 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
     public static final double kDriveDeadband = 0.05;
     public static final int kAutoConsolePort = 1;
+    public static final int kConsoleTeleopPort = 2;
+    public static final int kFieldDriveButton = 1;
   }
 
   public static final class AutoConstants {
