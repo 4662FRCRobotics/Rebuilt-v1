@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,6 +17,7 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("Hub Active" , isHubActive());
   }
 
   public Command shoot() {
@@ -23,5 +26,31 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command stopShoot() {
     return Commands.print("Stop shooting");
+  }
+
+  private boolean isHubActive() {
+    var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+              String myAlliance = alliance.get() == DriverStation.Alliance.Red? "R":"B";
+              String firstAlliance = DriverStation.getGameSpecificMessage();
+              Double matchTime = DriverStation.getMatchTime();
+              if (matchTime < 30) {
+                return true;
+              }
+              if (matchTime < 55) {
+                return myAlliance.equals(firstAlliance);
+              }
+              if (matchTime < 80) {
+                return !myAlliance.equals(firstAlliance);
+              }
+              if (matchTime < 105) {
+                return myAlliance.equals(firstAlliance);
+              }
+              if (matchTime < 130) {
+                return !myAlliance.equals(firstAlliance);
+              }
+              return true;
+            }
+            return false;
   }
 }
