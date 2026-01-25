@@ -14,7 +14,7 @@ public class AutonomousSubsystem extends SubsystemBase{
 
   // limited by the rotary switch settings of 6 and POV max of 8.
   public enum AutoPlan {
-    DRIVEOUT,
+   // DRIVEOUT,
     CENTER,
     LEFT,
     RIGHT
@@ -47,10 +47,10 @@ public class AutonomousSubsystem extends SubsystemBase{
     WAIT1("Wait", 1.0),
     WAIT2("Wait", 2.0),
     WAITLOOP("Wait", 99.9),
-    DRIVE_LEFT_TRENCH("Drive Plan", "drive left trench"),
-    DRIVE_CENTER_CLIMB("Drive Plan", "drive center climb"),
+    DRIVE_LEFT_TRENCH("Drive Plan", "Left Trench"),
+    DRIVE_CENTER_CLIMB("Drive Plan", "Center Climb"),
     SHOOT_LONG("Shoot" , "long"),
-    DRIVE_RIGHT_TRENCH("Drive Plan" , "drive right trench"),
+    DRIVE_RIGHT_TRENCH("Drive Plan" , "Right Trench"),
     SHOOT_SHORT("Shoot" , "short")
     ;
 
@@ -208,11 +208,7 @@ public class AutonomousSubsystem extends SubsystemBase{
  * the switch numbers are optional, although if the false one is used, then the true is required
  * 
  */
-    m_planSteps = new PlanStep[][] {
-      //DRIVE OUT
-          {new PlanStep(AutoStep.WAITLOOP),
-           new PlanStep(AutoStep.SHOOT_LONG , 1)
-          },  
+    m_planSteps = new PlanStep[][] { 
       //CENTER
           {new PlanStep(AutoStep.WAITLOOP), 
             new PlanStep(AutoStep.SHOOT_SHORT , 1), 

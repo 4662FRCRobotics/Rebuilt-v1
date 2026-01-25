@@ -4,9 +4,16 @@
 
 package frc.robot.subsystems;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,7 +23,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.CameraApriltag.CameraName;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -44,10 +55,10 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+  private final ADIS16470_IMU m_gyro = new ADIS16470_IMU(ADIS16470_IMU.IMUAxis.kZ, ADIS16470_IMU.IMUAxis.kX, ADIS16470_IMU.IMUAxis.kY);
 
   // Odometry class for tracking robot pose
-  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
+ /*  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
       DriveConstants.kDriveKinematics,
       Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
       new SwerveModulePosition[] {
@@ -55,25 +66,83 @@ public class DriveSubsystem extends SubsystemBase {
           m_frontRight.getPosition(),
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
-      });
+      });*/
+    
+     SwerveDrivePoseEstimator m_poseEstimator = new SwerveDrivePoseEstimator(
+            DriveConstants.kDriveKinematics,
+            getHeading(),
+            getModulePositions(),
+            new Pose2d());
+    private final Field2d m_field = new Field2d();
+
+    private final CameraApriltag m_CameraFront;
 
   /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() {
+  public DriveSubsystem(CameraApriltag m_CameraApriltag) {
     // Usage reporting for MAXSwerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
+
+    m_CameraFront = m_CameraApriltag;
+
+    RobotConfig config = null;
+    try{
+        config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+        // Handle exception as needed
+        e.printStackTrace();
+    }
+
+    AutoBuilder.configure(
+        this::getPose, // Robot pose supplier
+        this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+        this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+        new PPHolonomicDriveController( // HolonomicPathFollowerConfig
+                new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+        ),
+        config,
+        () -> {
+            // Boolean supplier that controls when the path will be mirrored for the red
+            // alliance
+            // This will flip the path being followed to the red side of the field.
+            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+            }
+            return false;
+        },
+        this // Reference to this subsystem to set requirements
+    );
+
+    SmartDashboard.putData("Field" , m_field);
   }
 
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
-    m_odometry.update(
+   /*  m_odometry.update(
         Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
         new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
-        });
+        });*/
+
+    m_poseEstimator.update(
+      getHeading(),
+      getModulePositions()
+      );
+
+    m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
+
+    SmartDashboard.putNumber("Gyro" , getHeading().getDegrees());
+    SmartDashboard.putBoolean("Have Apriltag" , m_CameraFront.hasTarget());
+    SmartDashboard.putNumber("Tag ID", m_CameraFront.getTargetID());
+
   }
 
   /**
@@ -82,7 +151,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The pose.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
+    return m_poseEstimator.getEstimatedPosition();
   }
 
   /**
@@ -90,15 +159,10 @@ public class DriveSubsystem extends SubsystemBase {
    *
    * @param pose The pose to which to set the odometry.
    */
-  public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(
-        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        },
+ public void resetOdometry(Pose2d pose) {
+    m_poseEstimator.resetPosition(
+       getHeading(),
+       getModulePositions(),
         pose);
   }
 
@@ -176,13 +240,22 @@ public class DriveSubsystem extends SubsystemBase {
     m_gyro.reset();
   }
 
+   private SwerveModulePosition[] getModulePositions(){
+    return new SwerveModulePosition[] {
+        m_frontLeft.getPosition(),
+        m_frontRight.getPosition(),
+        m_rearLeft.getPosition(),
+        m_rearRight.getPosition()
+    };
+    }
+
   /**
    * Returns the heading of the robot.
    *
    * @return the robot's heading in degrees, from -180 to 180
    */
-  public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)).getDegrees();
+  public Rotation2d getHeading() {
+    return Rotation2d.fromDegrees(m_gyro.getAngle());
   }
 
   /**
@@ -194,9 +267,44 @@ public class DriveSubsystem extends SubsystemBase {
     return m_gyro.getRate(IMUAxis.kZ) * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 
+  private void driveRobotRelative(ChassisSpeeds speeds) {
+    drive(speeds, false);
+  }
+
+  private void drive(ChassisSpeeds speeds, boolean fieldRelative) {
+      if (fieldRelative)
+          speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, getPose().getRotation());
+      //speeds = ChassisSpeeds.discretize(speeds, LoggedRobot.defaultPeriodSecs);
+      var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds);
+      SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+      setModuleStates(swerveModuleStates);
+  }
+
+  private ChassisSpeeds getRobotRelativeSpeeds() {
+    return DriveConstants.kDriveKinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  private SwerveModuleState[] getModuleStates() {
+    return new SwerveModuleState[] {
+            m_frontLeft.getState(),
+            m_frontRight.getState(),
+            m_rearLeft.getState(),
+            m_rearRight.getState()
+    };
+  }
+
   //PATHPLANNER
 
   public Command getPathStep(String pathName) {
-    return Commands.print("drive path " + pathName);
+    //return Commands.print("drive path " + pathName);
+    return new PathPlannerAuto(pathName);
+  }
+
+  private void updatePose() {
+    m_poseEstimator.resetPose(m_CameraFront.getVisionPose().get().estimatedPose.toPose2d());
+  }
+
+  public Command updatePosecmd() {
+    return Commands.runOnce(() -> updatePose() , this);
   }
 }

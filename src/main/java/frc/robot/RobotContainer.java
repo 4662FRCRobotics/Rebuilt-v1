@@ -34,8 +34,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  //private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
-  private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem();
+  private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
+  private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem(m_CameraFront);
   private final IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem();
   private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem();
   private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem();
@@ -121,6 +121,9 @@ public class RobotContainer {
 
     m_driverController.povDown()
       .whileTrue(m_ClimberSubsystem.retract().andThen(m_ClimberSubsystem.stop()));
+
+    m_ConsoleTeleop.button(2)
+      .onTrue(m_DriveSubsystem.updatePosecmd());
   }
 
   /**

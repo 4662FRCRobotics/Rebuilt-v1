@@ -55,9 +55,9 @@ public class CameraApriltag extends SubsystemBase {
     }
   }
 
-  PhotonCamera m_aprilCameraOne;
-  boolean m_hasTargets = false;
-  PhotonTrackedTarget m_target = new PhotonTrackedTarget();
+  private PhotonCamera m_aprilCameraOne;
+  private boolean m_hasTargets = false;
+  private PhotonTrackedTarget m_target = new PhotonTrackedTarget();
   private static final AprilTagFieldLayout m_fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
   private Transform3d m_robotToCam;
   private PhotonPoseEstimator m_photonPoseEstimator;
@@ -105,7 +105,7 @@ public class CameraApriltag extends SubsystemBase {
     return m_hasTargets;
   }
   //method to return target id
-  public int targetID() {
+  public int getTargetID() {
     return m_targetID;
   }
   //method to return the vision estimate
