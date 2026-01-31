@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0206276747503553,
-        "y": -0.33179743223965774
+        "x": 1.1278601997146929,
+        "y": 0.7550499286733234
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.648944365192582,
-        "y": 0.9491298145506415
+        "x": 3.896733238231098,
+        "y": 0.5868473609129818
       },
       "prevControl": {
-        "x": 6.885563480741796,
-        "y": 0.8456205420827394
+        "x": 2.7322539229671903,
+        "y": 0.3151355206847367
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,19 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Read Tag",
+      "waypointRelativePos": 0.6838235294117617,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Camera Pose Reset"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -42,7 +54,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 112.75097634278784
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,

@@ -16,6 +16,7 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -131,7 +132,9 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
         });*/
-
+    if (m_CameraFront.useCameraPose()) {
+      updatePose();
+    } 
     m_poseEstimator.update(
       getHeading(),
       getModulePositions()
@@ -143,6 +146,33 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Have Apriltag" , m_CameraFront.hasTarget());
     SmartDashboard.putNumber("Tag ID", m_CameraFront.getTargetID());
 
+    double robotPoseX = m_poseEstimator.getEstimatedPosition().getX();
+    double robotPoseY = m_poseEstimator.getEstimatedPosition().getY();
+    double robotPoseDeg = m_poseEstimator.getEstimatedPosition().getRotation().getDegrees();
+
+    SmartDashboard.putNumber("Robot Pose X" , robotPoseX);
+    SmartDashboard.putNumber("Robot Pose Y" , robotPoseY);
+    SmartDashboard.putNumber("Robot Pose Degrees" , robotPoseDeg);
+
+    double hubX = 0;
+    double hubY = 0;
+
+     var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent()) {
+                if(alliance.get() == DriverStation.Alliance.Red) {
+                  hubX = DriveConstants.kHubRedX;
+                  hubY = DriveConstants.kHubRedY;
+                } else {
+                  hubX = DriveConstants.kHubBlueX;
+                  hubY = DriveConstants.kHubBlueY;
+                }
+            }
+    Pose2d hubPose2d = new Pose2d(hubX , hubY , new Rotation2d());
+    Transform2d toHub = new Transform2d(m_poseEstimator.getEstimatedPosition() , hubPose2d);
+
+    SmartDashboard.putNumber("To Hub X" , toHub.getX());
+    SmartDashboard.putNumber("To Hub Y" , toHub.getY());
+    SmartDashboard.putNumber("To Hub Angle" , toHub.getRotation().getDegrees());
   }
 
   /**
@@ -300,11 +330,22 @@ public class DriveSubsystem extends SubsystemBase {
     return new PathPlannerAuto(pathName);
   }
 
-  private void updatePose() {
-    m_poseEstimator.resetPose(m_CameraFront.getVisionPose().get().estimatedPose.toPose2d());
+  /*public void addVisionMeasurment() {
+    m_poseEstimator.addVisionMeasurement(m_CameraFront.getVisionPose()., getTurnRate());
+  }*/
+
+  private void updatePose() { 
+    if (m_CameraFront.hasTarget()) {
+      m_poseEstimator.resetPose(m_CameraFront.getVisionPose().get().estimatedPose.toPose2d());
+      m_CameraFront.setUseCameraPose(false);
+      System.out.println("Update Pose ");
+    } else {
+      System.out.println("Update Pose Failed");
+    }
   }
 
   public Command updatePosecmd() {
-    return Commands.runOnce(() -> updatePose() , this);
+    return Commands.runOnce(() -> updatePose() , this)
+    .ignoringDisable(true);
   }
 }
