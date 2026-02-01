@@ -13,6 +13,9 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.CameraApriltag.CameraName;
+
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -54,21 +57,26 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // Configure the trigger bindings
-    configureBindings();
-      m_DriveSubsystem.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_DriveSubsystem.drive(
-                -MathUtil.applyDeadband(m_driverController.getLeftY(), OperatorConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getLeftX(), OperatorConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
-                m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
-            m_DriveSubsystem));
-  }
-
-  /**
+    registerNamedCommands();
+        // Configure the trigger bindings
+        configureBindings();
+          m_DriveSubsystem.setDefaultCommand(
+            // The left stick controls translation of the robot.
+            // Turning is controlled by the X axis of the right stick.
+            new RunCommand(
+                () -> m_DriveSubsystem.drive(
+                    -MathUtil.applyDeadband(m_driverController.getLeftY(), OperatorConstants.kDriveDeadband),
+                    -MathUtil.applyDeadband(m_driverController.getLeftX(), OperatorConstants.kDriveDeadband),
+                    -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
+                    m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
+                m_DriveSubsystem));
+      }
+      // Pathplanner Events
+      private void registerNamedCommands() {
+        NamedCommands.registerCommand("Camera Pose Reset" , m_CameraFront.cmdUseCameraPose());
+      }
+    
+      /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
