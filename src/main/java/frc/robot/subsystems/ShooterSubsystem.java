@@ -22,6 +22,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.hal.HAL.SimPeriodicAfterCallback;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -101,6 +102,9 @@ public class ShooterSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putBoolean("Hub Active", isHubActive());
     SmartDashboard.putNumber("Backwheel Target", m_backwheelController.getClosedLoopController().getSetpoint());
+    SmartDashboard.putNumber("Backwheel Velocity", m_backwheelEncoder.getVelocity());
+    SmartDashboard.putNumber("Shooter Velocity", m_shooterController.getVelocity().getValueAsDouble());
+
 
   }
 
