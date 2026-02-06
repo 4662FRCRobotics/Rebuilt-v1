@@ -14,6 +14,8 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.CameraApriltag.CameraName;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
@@ -70,6 +72,8 @@ public class RobotContainer {
                     -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
                     m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
                 m_DriveSubsystem));
+
+          m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.setcmd(0));
       }
       // Pathplanner Events
       private void registerNamedCommands() {
@@ -122,7 +126,7 @@ public class RobotContainer {
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
 
     m_driverController.rightTrigger()
-      .whileTrue(m_ShooterSubsystem.shoot().andThen(m_ShooterSubsystem.stopShoot()));
+      .whileTrue(m_ShooterSubsystem.setVelocitycmd(RPM.of(300)));
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
