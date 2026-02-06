@@ -86,7 +86,7 @@ public class CameraApriltag extends SubsystemBase {
     m_aprilCameraOne.setDriverMode(false);
     m_robotToCam = new Transform3d(new Translation3d(name.getX(), name.getY(), name.getZ()),
         new Rotation3d(0, name.getPitch(), 0));
-    m_photonPoseEstimator = new PhotonPoseEstimator(m_fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+    m_photonPoseEstimator = new PhotonPoseEstimator(m_fieldLayout,
         m_robotToCam);
   }
 
