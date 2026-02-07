@@ -28,9 +28,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
-//import frc.robot.subsystems.CameraApriltag.CameraName;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -163,6 +161,7 @@ public class DriveSubsystem extends SubsystemBase {
     double robotPoseX = m_poseEstimator.getEstimatedPosition().getX();
     double robotPoseY = m_poseEstimator.getEstimatedPosition().getY();
     double robotPoseDeg = m_poseEstimator.getEstimatedPosition().getRotation().getDegrees();
+    
 
     SmartDashboard.putNumber("Robot Pose X", robotPoseX);
     SmartDashboard.putNumber("Robot Pose Y", robotPoseY);
@@ -170,15 +169,18 @@ public class DriveSubsystem extends SubsystemBase {
 
     double hubX = 0;
     double hubY = 0;
+    double hubPose = 0;
 
     var alliance = DriverStation.getAlliance();
     if (alliance.isPresent()) {
       if (alliance.get() == DriverStation.Alliance.Red) {
         hubX = DriveConstants.kHubRedX;
         hubY = DriveConstants.kHubRedY;
+        hubPose = DriveConstants.kHubRedPose;
       } else {
         hubX = DriveConstants.kHubBlueX;
         hubY = DriveConstants.kHubBlueY;
+        hubPose = DriveConstants.kHubBluePose;
       }
     }
 
@@ -186,11 +188,16 @@ public class DriveSubsystem extends SubsystemBase {
     double robotToHubY = m_poseEstimator.getEstimatedPosition().getY() - hubY;
     double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
     double robotToHubAngle = Math.toDegrees(Math.atan(robotToHubY / robotToHubX));
+    double robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
+
+    boolean isShootAngle = Math.abs(robotPoseToHubAngle) < 5;
 
     SmartDashboard.putNumber("To Hub X", robotToHubX);
     SmartDashboard.putNumber("To Hub Y", robotToHubY);
     SmartDashboard.putNumber("To Hub Angle", robotToHubAngle);
     SmartDashboard.putNumber("To Hub Distance", robotToHubDistance);
+    SmartDashboard.putNumber("Pose to Hub Angle" , robotPoseToHubAngle);
+    SmartDashboard.putBoolean("Shooting Angle", isShootAngle);
 
     /*
      * Pose2d hubPose2d = new Pose2d(hubX , hubY , new Rotation2d());
@@ -301,8 +308,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   private void setYaw() {
     if (m_CameraFront.hasTarget()) {
-      m_gyro.setGyroAngle(m_gyro.getYawAxis() , 
-        m_CameraFront.getVisionPose().get().estimatedPose.toPose2d().getRotation().getDegrees());
+      m_gyro.setGyroAngle(m_gyro.getYawAxis(),
+          m_CameraFront.getVisionPose().get().estimatedPose.toPose2d().getRotation().getDegrees());
       m_CameraFront.setUseCameraYaw(false);
       System.out.println("Update Yaw ");
     } else {
@@ -370,12 +377,13 @@ public class DriveSubsystem extends SubsystemBase {
     return new PathPlannerAuto(pathName);
   }
 
-  /*
-   * public void addVisionMeasurment() {
-   * m_poseEstimator.addVisionMeasurement(m_CameraFront.getVisionPose().,
-   * getTurnRate());
-   * }
-   */
+  public void addVisionMeasurment() {
+    if (m_CameraFront.hasTarget()) {
+      m_poseEstimator.addVisionMeasurement(m_CameraFront.getVisionPose2d(),
+          m_CameraFront.getVisionTmst(),
+          m_CameraFront.getEstimationStdDevs());
+    }
+  }
 
   private void updatePose() {
     if (m_CameraFront.hasTarget()) {
@@ -387,8 +395,10 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
-  /* public Command updatePosecmd() {
-    return Commands.runOnce(() -> updatePose(), this)
-        .ignoringDisable(true);
-  } */
+  /*
+   * public Command updatePosecmd() {
+   * return Commands.runOnce(() -> updatePose(), this)
+   * .ignoringDisable(true);
+   * }
+   */
 }
