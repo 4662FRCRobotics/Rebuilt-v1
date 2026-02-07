@@ -131,7 +131,10 @@ public class RobotContainer {
       .whileTrue(m_ClimberSubsystem.retract().andThen(m_ClimberSubsystem.stop()));
 
     m_ConsoleTeleop.button(2)
-      .onTrue(m_DriveSubsystem.updatePosecmd());
+      .onTrue(m_CameraFront.cmdUseCameraPose());
+
+    m_ConsoleTeleop.button(3)
+      .onTrue(m_CameraFront.cmdUseCameraYaw());
   }
 
   /**

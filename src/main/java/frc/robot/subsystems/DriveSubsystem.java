@@ -138,9 +138,18 @@ public class DriveSubsystem extends SubsystemBase {
      * m_rearRight.getPosition()
      * });
      */
+
+    SmartDashboard.putBoolean("use Camera Pose", m_CameraFront.useCameraPose());
+    SmartDashboard.putBoolean("use Camera Yaw", m_CameraFront.useCameraYaw());
+
     if (m_CameraFront.useCameraPose()) {
       updatePose();
     }
+
+    if (m_CameraFront.useCameraYaw()) {
+      setYaw();
+    }
+
     m_poseEstimator.update(
         getHeading(),
         getModulePositions());
@@ -290,6 +299,17 @@ public class DriveSubsystem extends SubsystemBase {
     m_gyro.reset();
   }
 
+  private void setYaw() {
+    if (m_CameraFront.hasTarget()) {
+      m_gyro.setGyroAngle(m_gyro.getYawAxis() , 
+        m_CameraFront.getVisionPose().get().estimatedPose.toPose2d().getRotation().getDegrees());
+      m_CameraFront.setUseCameraYaw(false);
+      System.out.println("Update Yaw ");
+    } else {
+      System.out.println("Update Yaw Failed ");
+    }
+  }
+
   private SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
         m_frontLeft.getPosition(),
@@ -367,8 +387,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
-  public Command updatePosecmd() {
+  /* public Command updatePosecmd() {
     return Commands.runOnce(() -> updatePose(), this)
         .ignoringDisable(true);
-  }
+  } */
 }

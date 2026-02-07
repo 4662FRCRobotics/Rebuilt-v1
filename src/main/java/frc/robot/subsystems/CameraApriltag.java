@@ -79,6 +79,7 @@ public class CameraApriltag extends SubsystemBase {
   private int m_targetID = 0;
   private Matrix<N3, N1> m_curStdDevs;
   private boolean m_useCameraPose = false;
+  private boolean m_useCameraYaw = false;
 
   /** Creates a new CameraApriltag. */
   public CameraApriltag(CameraName name) {
@@ -224,7 +225,7 @@ public class CameraApriltag extends SubsystemBase {
   }
 
   public boolean useCameraPose() {
-    return m_useCameraPose;
+    return this.m_useCameraPose;
   }
 
   public void setUseCameraPose(boolean useCameraPose) {
@@ -232,6 +233,20 @@ public class CameraApriltag extends SubsystemBase {
   }
 
   public Command cmdUseCameraPose() {
-    return Commands.runOnce(() -> setUseCameraPose(true), this);
+    return Commands.runOnce(() -> setUseCameraPose(true), this)
+        .ignoringDisable(true);
+  }
+
+  public boolean useCameraYaw() {
+    return this.m_useCameraYaw;
+  }
+
+  public void setUseCameraYaw(boolean useCameraYaw) {
+    this.m_useCameraYaw = useCameraYaw;
+  }
+
+  public Command cmdUseCameraYaw() {
+    return Commands.runOnce(() -> setUseCameraYaw(true), this)
+        .ignoringDisable(true);
   }
 }
