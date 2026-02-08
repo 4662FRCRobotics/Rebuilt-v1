@@ -8,7 +8,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
@@ -25,7 +25,6 @@ import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class CameraApriltag extends SubsystemBase {
@@ -79,6 +78,7 @@ public class CameraApriltag extends SubsystemBase {
   private int m_targetID = 0;
   private Matrix<N3, N1> m_curStdDevs;
   private boolean m_useCameraPose = false;
+  private boolean m_useCameraYaw = false;
 
   /** Creates a new CameraApriltag. */
   public CameraApriltag(CameraName name) {
@@ -86,18 +86,18 @@ public class CameraApriltag extends SubsystemBase {
     m_aprilCameraOne.setDriverMode(false);
     m_robotToCam = new Transform3d(new Translation3d(name.getX(), name.getY(), name.getZ()),
         new Rotation3d(0, name.getPitch(), 0));
-    m_photonPoseEstimator = new PhotonPoseEstimator(m_fieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+    m_photonPoseEstimator = new PhotonPoseEstimator(m_fieldLayout,
         m_robotToCam);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    double yaw = 0;
-    double pitch = 0;
-    double area = 0;
-    double skew = 0;
-    Optional<Pose3d> target3d;
+    //double yaw = 0;
+    //double pitch = 0;
+    //double area = 0;
+    //double skew = 0;
+    //Optional<Pose3d> target3d;
     // Optional<EstimatedRobotPose> visionEst = Optional.empty();
     /*
      * var april1Result = m_aprilCameraOne.getLatestResult();
@@ -223,8 +223,24 @@ public class CameraApriltag extends SubsystemBase {
     return m_visionEst;
   }
 
+  public Pose2d getVisionPose2d() {
+    if (m_visionEst.isPresent()) {
+      return m_visionEst.get().estimatedPose.toPose2d();
+    } else {
+      return null;
+    }
+  }
+
+  public double getVisionTmst() {
+    if (m_visionEst.isPresent()) {
+      return m_visionEst.get().timestampSeconds;
+    } else {
+      return 0;
+    }
+  }
+
   public boolean useCameraPose() {
-    return m_useCameraPose;
+    return this.m_useCameraPose;
   }
 
   public void setUseCameraPose(boolean useCameraPose) {
@@ -232,6 +248,20 @@ public class CameraApriltag extends SubsystemBase {
   }
 
   public Command cmdUseCameraPose() {
-    return Commands.runOnce(() -> setUseCameraPose(true), this);
+    return Commands.runOnce(() -> setUseCameraPose(true), this)
+        .ignoringDisable(true);
+  }
+
+  public boolean useCameraYaw() {
+    return this.m_useCameraYaw;
+  }
+
+  public void setUseCameraYaw(boolean useCameraYaw) {
+    this.m_useCameraYaw = useCameraYaw;
+  }
+
+  public Command cmdUseCameraYaw() {
+    return Commands.runOnce(() -> setUseCameraYaw(true), this)
+        .ignoringDisable(true);
   }
 }
