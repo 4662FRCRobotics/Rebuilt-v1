@@ -65,6 +65,8 @@ public final class Constants {
     public static final double kHubBlueY = 4.035;
     public static final double kHubRedX = 11.915;
     public static final double kHubRedY = 4.035;
+    public static final double kHubBluePose = 0;
+    public static final double kHubRedPose = 180;
   }
 
   public static final class ModuleConstants {
