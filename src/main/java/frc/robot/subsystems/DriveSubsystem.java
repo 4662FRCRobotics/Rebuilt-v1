@@ -13,6 +13,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,6 +31,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -78,6 +81,11 @@ public class DriveSubsystem extends SubsystemBase {
   private final Field2d m_field = new Field2d();
 
   private final CameraApriltag m_CameraFront;
+
+  private double m_robotPoseToHubAngle;
+
+  private PIDController m_turnPIDCntrl = 
+    new PIDController(DriveConstants.kTurnP, DriveConstants.kTurnI, DriveConstants.kTurnD);
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem(CameraApriltag m_CameraApriltag) {
@@ -188,15 +196,15 @@ public class DriveSubsystem extends SubsystemBase {
     double robotToHubY = m_poseEstimator.getEstimatedPosition().getY() - hubY;
     double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
     double robotToHubAngle = Math.toDegrees(Math.atan(robotToHubY / robotToHubX));
-    double robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
+    m_robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
 
-    boolean isShootAngle = Math.abs(robotPoseToHubAngle) < 5;
+    boolean isShootAngle = Math.abs(m_robotPoseToHubAngle) < 5;
 
     SmartDashboard.putNumber("To Hub X", robotToHubX);
     SmartDashboard.putNumber("To Hub Y", robotToHubY);
     SmartDashboard.putNumber("To Hub Angle", robotToHubAngle);
     SmartDashboard.putNumber("To Hub Distance", robotToHubDistance);
-    SmartDashboard.putNumber("Pose to Hub Angle" , robotPoseToHubAngle);
+    SmartDashboard.putNumber("Pose to Hub Angle" , m_robotPoseToHubAngle);
     SmartDashboard.putBoolean("Shooting Angle", isShootAngle);
 
     /*
@@ -401,4 +409,36 @@ public class DriveSubsystem extends SubsystemBase {
    * .ignoringDisable(true);
    * }
    */
+
+  private void turnInit() {
+    m_turnPIDCntrl.setTolerance(DriveConstants.kTurnTolerance);
+    double turnGoalAngle = m_gyro.getAngle() + m_robotPoseToHubAngle;
+    m_turnPIDCntrl.reset();
+    m_turnPIDCntrl.setSetpoint(turnGoalAngle);
+  }
+
+  private void turnExec() {
+    double omegaDegPerSec = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -22.5, 22.5);
+    omegaDegPerSec = (omegaDegPerSec < 0) ?
+      omegaDegPerSec - DriveConstants.kMinOmega:
+      omegaDegPerSec + DriveConstants.kMinOmega;
+    drive(0, 0, omegaDegPerSec, false);
+  }
+
+  private void turnEnd(boolean interrupted) {
+    System.out.println("Align Turn Ended");
+  }
+
+  private boolean turnIsFinished() {
+    return m_turnPIDCntrl.atSetpoint();
+  }
+
+  public Command cmdTurnToHub() {
+    return new FunctionalCommand(
+      () -> turnInit(),
+      () -> turnExec(),
+      (Interrupted) -> turnEnd(Interrupted),
+      () -> turnIsFinished(),
+      this);
+    }
 }
