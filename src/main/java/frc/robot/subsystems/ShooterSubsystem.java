@@ -54,7 +54,7 @@ public class ShooterSubsystem extends SubsystemBase {
     //gearing from motor to shaft
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
     //motor proerties
-    .withMotorInverted(false)
+    .withMotorInverted(true)
     .withIdleMode(MotorMode.COAST)
     .withStatorCurrentLimit(Amps.of(60));
 
@@ -71,7 +71,7 @@ public class ShooterSubsystem extends SubsystemBase {
     //gearing from motor to shaft
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(2)))
     //motor proerties
-    .withMotorInverted(true)
+    .withMotorInverted(false)
     .withIdleMode(MotorMode.COAST)
     .withStatorCurrentLimit(Amps.of(40));
 
