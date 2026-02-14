@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import org.photonvision.PhotonUtils;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
@@ -57,8 +59,8 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  private final ADIS16470_IMU m_gyro = new ADIS16470_IMU(ADIS16470_IMU.IMUAxis.kZ, ADIS16470_IMU.IMUAxis.kX,
-      ADIS16470_IMU.IMUAxis.kY);
+  private final ADIS16470_IMU m_gyro = new ADIS16470_IMU(ADIS16470_IMU.IMUAxis.kY, ADIS16470_IMU.IMUAxis.kZ,
+      ADIS16470_IMU.IMUAxis.kX);
 
   // Odometry class for tracking robot pose
   /*
@@ -178,6 +180,7 @@ public class DriveSubsystem extends SubsystemBase {
     double hubX = 0;
     double hubY = 0;
     double hubPose = 0;
+    Pose2d hubPose2d = new Pose2d();
 
     var alliance = DriverStation.getAlliance();
     if (alliance.isPresent()) {
@@ -190,22 +193,28 @@ public class DriveSubsystem extends SubsystemBase {
         hubY = DriveConstants.kHubBlueY;
         hubPose = DriveConstants.kHubBluePose;
       }
+      hubPose2d = new Pose2d(hubX , hubY , Rotation2d.fromDegrees(hubPose));
     }
 
     double robotToHubX = m_poseEstimator.getEstimatedPosition().getX() - hubX;
     double robotToHubY = m_poseEstimator.getEstimatedPosition().getY() - hubY;
-    double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
-    double robotToHubAngle = Math.toDegrees(Math.atan(robotToHubY / robotToHubX));
-    m_robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
+   // double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
+    //double robotToHubAngle = Math.toDegrees(Math.atan(robotToHubY / robotToHubX));
+    //m_robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
+    double robotToHubDistancePV = PhotonUtils.getDistanceToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d);
+    m_robotPoseToHubAngle = PhotonUtils.getYawToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d).getDegrees();
 
     boolean isShootAngle = Math.abs(m_robotPoseToHubAngle) < 5;
 
     SmartDashboard.putNumber("To Hub X", robotToHubX);
     SmartDashboard.putNumber("To Hub Y", robotToHubY);
-    SmartDashboard.putNumber("To Hub Angle", robotToHubAngle);
-    SmartDashboard.putNumber("To Hub Distance", robotToHubDistance);
     SmartDashboard.putNumber("Pose to Hub Angle" , m_robotPoseToHubAngle);
     SmartDashboard.putBoolean("Shooting Angle", isShootAngle);
+    SmartDashboard.putNumber("Gyro Yaw" , m_gyro.getAngle(IMUAxis.kYaw));
+    SmartDashboard.putNumber("Gyro Roll" , m_gyro.getAngle(IMUAxis.kRoll));
+    SmartDashboard.putNumber("Gyro Pitch" , m_gyro.getAngle(IMUAxis.kPitch));
+    SmartDashboard.putNumber("Angle Photon to hub" , m_robotPoseToHubAngle);
+    SmartDashboard.putNumber("Distance Photon to hub", robotToHubDistancePV);
 
     /*
      * Pose2d hubPose2d = new Pose2d(hubX , hubY , new Rotation2d());
@@ -418,11 +427,8 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   private void turnExec() {
-    double omegaDegPerSec = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -22.5, 22.5);
-    omegaDegPerSec = (omegaDegPerSec < 0) ?
-      omegaDegPerSec - DriveConstants.kMinOmega:
-      omegaDegPerSec + DriveConstants.kMinOmega;
-    drive(0, 0, omegaDegPerSec, false);
+    double rotation = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -0.5, 0.5);
+    drive(0, 0, rotation, false);
   }
 
   private void turnEnd(boolean interrupted) {

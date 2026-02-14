@@ -71,7 +71,7 @@ public class RobotContainer {
                     m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
                 m_DriveSubsystem));
 
-                m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot());
+                m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShootcmd());
 
       }
       

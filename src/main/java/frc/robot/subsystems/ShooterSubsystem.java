@@ -24,8 +24,12 @@ public class ShooterSubsystem extends SubsystemBase {
     return Commands.print("Shoot pew pew");
   }
 
-  public Command stopShoot() {
-    return Commands.print("Stop shooting");
+  public Command stopShootcmd() {
+    return Commands.runOnce(() -> stopShootPrint() , this);
+  }
+
+  private void stopShootPrint() {
+   // System.out.println("Stop Shooting");
   }
 
   private boolean isHubActive() {
