@@ -78,7 +78,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private TalonFX m_flywheelController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
 
-  private SparkMax m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControlerCanID, MotorType.kBrushless);
+  private SparkMax m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControllerCanID, MotorType.kBrushless);
 
   private SmartMotorController m_smartBackwheelController =
     new SparkWrapper(m_backwheelController, DCMotor.getNEO(1), m_backwheelSMCConfig);
@@ -111,19 +111,19 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command setVelocitycmd(AngularVelocity speed) {
     //return m_flywheel.setSpeed(speed);
-    return run(() -> {
+    return Commands.run(() -> {
       m_smartFlywheelController.setVelocity(speed);
       m_smartBackwheelController.setVelocity(speed);
-    })
+    } , this)
     .withName("CustomShooterVelocity");
   }
 
   public Command setcmd(double dutyCycle) {
     //return m_flywheel.set(dutyCycle);
-    return run(() -> {
+    return Commands.run(() -> {
       m_smartFlywheelController.setDutyCycle(dutyCycle);
       m_smartBackwheelController.setDutyCycle(dutyCycle);
-    })
+    } , this)
     .withName("CustomShooterDutyCycle");
   }
  

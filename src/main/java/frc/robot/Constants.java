@@ -120,6 +120,6 @@ public final class Constants {
 
   public static final class ShooterConstants {
     public static final int kFlywheelControllerCanId = 20;
-    public static final int kBackwheelControlerCanID = 21;
+    public static final int kBackwheelControllerCanID = 21;
   }
 }
