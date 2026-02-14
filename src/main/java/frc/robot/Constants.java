@@ -117,4 +117,12 @@ public final class Constants {
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
   }
+
+  public static final class ShooterConstants {
+    public static final int kFlywheelControllerCanId = 20;
+    public static final int kBackwheelControllerCanId = 21;
+    public static final double kShooterMaxVoltage = 10;
+    public static final double kShooterMinVoltage = 6;
+    public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
+  }
 }

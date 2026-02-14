@@ -17,6 +17,7 @@ import frc.robot.subsystems.CameraApriltag.CameraName;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -70,7 +71,11 @@ public class RobotContainer {
                     -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
                     m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
                 m_DriveSubsystem));
+
+          m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot(() -> m_ConsoleTeleop.getRawAxis(0)));
+
       }
+
       // Pathplanner Events
       private void registerNamedCommands() {
         NamedCommands.registerCommand("Camera Pose Reset" , m_CameraFront.cmdUseCameraPose());
@@ -122,7 +127,7 @@ public class RobotContainer {
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
 
     m_driverController.rightTrigger()
-      .whileTrue(m_ShooterSubsystem.shoot().andThen(m_ShooterSubsystem.stopShoot()));
+      .whileTrue(m_ShooterSubsystem.shoot(() -> m_ConsoleTeleop.getRawAxis(0)));
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
