@@ -129,7 +129,7 @@ public class RobotContainer {
     m_driverController.rightTrigger()
       .whileTrue(m_DriveSubsystem.cmdTurnToHub()
       .andThen(m_ShooterSubsystem.shoot(() -> m_ConsoleTeleop.getRawAxis(0)))
-      ));
+      );
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
