@@ -127,7 +127,9 @@ public class RobotContainer {
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
 
     m_driverController.rightTrigger()
-      .whileTrue(m_ShooterSubsystem.shoot(() -> m_ConsoleTeleop.getRawAxis(0)));
+      .whileTrue(m_DriveSubsystem.cmdTurnToHub()
+      .andThen(m_ShooterSubsystem.shoot(() -> m_ConsoleTeleop.getRawAxis(0)))
+      ));
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
