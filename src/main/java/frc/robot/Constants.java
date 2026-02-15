@@ -67,6 +67,12 @@ public final class Constants {
     public static final double kHubRedY = 4.035;
     public static final double kHubBluePose = 0;
     public static final double kHubRedPose = 180;
+
+    public static final double kTurnP = 2.0;
+    public static final double kTurnI = 0.0;
+    public static final double kTurnD = 0.0;
+    public static final double kMinOmega = 10.0;
+    public static final double kTurnTolerance = 1;
   }
 
   public static final class ModuleConstants {

@@ -70,7 +70,11 @@ public class RobotContainer {
                     -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
                     m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
                 m_DriveSubsystem));
+
+                m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShootcmd());
+
       }
+      
       // Pathplanner Events
       private void registerNamedCommands() {
         NamedCommands.registerCommand("Camera Pose Reset" , m_CameraFront.cmdUseCameraPose());
@@ -122,7 +126,9 @@ public class RobotContainer {
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
 
     m_driverController.rightTrigger()
-      .whileTrue(m_ShooterSubsystem.shoot().andThen(m_ShooterSubsystem.stopShoot()));
+      .whileTrue(m_DriveSubsystem.cmdTurnToHub()
+      .andThen(m_ShooterSubsystem.shoot()
+      ));
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
