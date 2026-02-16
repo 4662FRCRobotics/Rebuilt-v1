@@ -128,6 +128,7 @@ public class RobotContainer {
 
     m_driverController.rightTrigger()
       .whileTrue(m_DriveSubsystem.cmdTurnToHub()
+      .unless(() -> m_driverController.getHID().getBButton())
       .andThen(m_ShooterSubsystem.shoot(() -> m_ConsoleTeleop.getRawAxis(0)))
       );
 
