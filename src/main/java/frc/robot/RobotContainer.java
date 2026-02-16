@@ -142,6 +142,9 @@ public class RobotContainer {
 
     m_ConsoleTeleop.button(3)
       .onTrue(m_CameraFront.cmdUseCameraYaw());
+
+    m_ConsoleTeleop.button(4)
+      .onTrue(m_DriveSubsystem.cmdCalibrateGyro());
   }
 
   /**
