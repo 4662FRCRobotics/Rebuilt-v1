@@ -126,7 +126,7 @@ public class RobotContainer {
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
 
     m_driverController.rightTrigger()
-      .whileTrue(m_ShooterSubsystem.setVelocitycmd(RPM.of(1000)));
+      .whileTrue(m_ShooterSubsystem.setVelocitycmd(RPM.of(2000)));
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));

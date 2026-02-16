@@ -89,13 +89,13 @@ public class ShooterSubsystem extends SubsystemBase {
   private final FlyWheelConfig m_shooterFlyWheelConfig = new FlyWheelConfig(m_smartFlywheelController)
     .withDiameter(Inches.of(3))
     .withMass(Ounces.of(10.9))
-    .withUpperSoftLimit(RPM.of(3000))
+    .withUpperSoftLimit(RPM.of(4000))
     .withTelemetry("Shooter Mech " , TelemetryVerbosity.HIGH);
 
   private final FlyWheelConfig m_backwheelwheelConfig = new FlyWheelConfig(m_smartBackwheelController)
     .withDiameter(Inches.of(2))
     .withMass(Ounces.of(8))
-    .withUpperSoftLimit(RPM.of(2000))
+    .withUpperSoftLimit(RPM.of(4000))
     .withTelemetry("Backwheel Mech", TelemetryVerbosity.HIGH);
 
   private FlyWheel m_flywheel = new FlyWheel(m_shooterFlyWheelConfig);
@@ -120,10 +120,17 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command setcmd(double dutyCycle) {
     //return m_flywheel.set(dutyCycle);
-    return Commands.run(() -> {
+    return Commands.startRun(() -> {
+      m_smartBackwheelController.stopClosedLoopController();
+      m_smartFlywheelController.stopClosedLoopController();
+    } , () -> {
       m_smartFlywheelController.setDutyCycle(dutyCycle);
       m_smartBackwheelController.setDutyCycle(dutyCycle);
     } , this)
+    .finallyDo(() -> {
+      m_smartFlywheelController.startClosedLoopController();
+      m_smartBackwheelController.startClosedLoopController();
+    })
     .withName("CustomShooterDutyCycle");
   }
  
