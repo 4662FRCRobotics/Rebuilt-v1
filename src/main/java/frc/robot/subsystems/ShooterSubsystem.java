@@ -54,7 +54,7 @@ public class ShooterSubsystem extends SubsystemBase {
     //gearing from motor to shaft
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(1)))
     //motor proerties
-    .withMotorInverted(false)
+    .withMotorInverted(true)
     .withIdleMode(MotorMode.COAST)
     .withStatorCurrentLimit(Amps.of(60));
 
@@ -71,14 +71,14 @@ public class ShooterSubsystem extends SubsystemBase {
     //gearing from motor to shaft
     .withGearing(new MechanismGearing(GearBox.fromReductionStages(2)))
     //motor proerties
-    .withMotorInverted(true)
+    .withMotorInverted(false)
     .withIdleMode(MotorMode.COAST)
     .withStatorCurrentLimit(Amps.of(40));
 
 
   private TalonFX m_flywheelController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
 
-  private SparkMax m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControlerCanID, MotorType.kBrushless);
+  private SparkMax m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControllerCanID, MotorType.kBrushless);
 
   private SmartMotorController m_smartBackwheelController =
     new SparkWrapper(m_backwheelController, DCMotor.getNEO(1), m_backwheelSMCConfig);
@@ -111,19 +111,19 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public Command setVelocitycmd(AngularVelocity speed) {
     //return m_flywheel.setSpeed(speed);
-    return run(() -> {
+    return Commands.run(() -> {
       m_smartFlywheelController.setVelocity(speed);
       m_smartBackwheelController.setVelocity(speed);
-    })
+    } , this)
     .withName("CustomShooterVelocity");
   }
 
   public Command setcmd(double dutyCycle) {
     //return m_flywheel.set(dutyCycle);
-    return run(() -> {
+    return Commands.run(() -> {
       m_smartFlywheelController.setDutyCycle(dutyCycle);
       m_smartBackwheelController.setDutyCycle(dutyCycle);
-    })
+    } , this)
     .withName("CustomShooterDutyCycle");
   }
  
