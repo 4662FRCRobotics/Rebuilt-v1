@@ -38,10 +38,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+    private final CommandGenericHID m_ConsoleTeleop = 
+    new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+  
   private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
   private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem(m_CameraFront);
   private final IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem();
-  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem();
+ // private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(m_DriveSubsystem.getDistanceToHub());
+  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(() -> m_ConsoleTeleop.getHID().getRawAxis(0));
   private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem();
   private final ConsoleAuto m_ConsoleAuto = new ConsoleAuto(OperatorConstants.kAutoConsolePort);
   private final AutonomousSubsystem m_AutonomousSubsystem = new AutonomousSubsystem(m_ConsoleAuto, this, m_DriveSubsystem, m_ShooterSubsystem, m_IntakeSubsystem, m_ClimberSubsystem);
@@ -49,8 +53,8 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
   
-  private final CommandGenericHID m_ConsoleTeleop = 
-    new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+ // private final CommandGenericHID m_ConsoleTeleop = 
+    //new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
   
   private static boolean m_runAutoConsole;
 
@@ -72,7 +76,7 @@ public class RobotContainer {
                     m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
                 m_DriveSubsystem));
 
-          m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot(() -> m_ConsoleTeleop.getRawAxis(0)));
+          m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot());
 
       }
 
@@ -128,7 +132,8 @@ public class RobotContainer {
 
     m_driverController.rightTrigger()
       .whileTrue(m_DriveSubsystem.cmdTurnToHub()
-      .andThen(m_ShooterSubsystem.shoot(() -> m_ConsoleTeleop.getRawAxis(0)))
+      .unless(() -> m_driverController.getHID().getBButton())
+      .andThen(m_ShooterSubsystem.shoot())
       );
 
     m_driverController.povUp()
