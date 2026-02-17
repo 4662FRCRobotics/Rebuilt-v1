@@ -388,7 +388,7 @@ public class AutonomousSubsystem extends SubsystemBase{
         break;
       case "Shoot":
         // build sequence to raise elevator, move hand up, and wait until elevator is in position
-        workCmd = m_shooter.shoot(() -> 0);
+        workCmd = m_shooter.shoot();
         break;
       default:
         break;

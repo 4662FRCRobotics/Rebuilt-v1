@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import org.photonvision.PhotonUtils;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -86,6 +88,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final CameraApriltag m_CameraFront;
 
   private double m_robotPoseToHubAngle;
+  private double m_robotToHubDistancePV;
 
   private PIDController m_turnPIDCntrl = 
     new PIDController(DriveConstants.kTurnP, DriveConstants.kTurnI, DriveConstants.kTurnD);
@@ -204,7 +207,7 @@ public class DriveSubsystem extends SubsystemBase {
    // double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
     //double robotToHubAngle = Math.toDegrees(Math.atan(robotToHubY / robotToHubX));
     //m_robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
-    double robotToHubDistancePV = PhotonUtils.getDistanceToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d);
+    m_robotToHubDistancePV = PhotonUtils.getDistanceToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d);
     m_robotPoseToHubAngle = PhotonUtils.getYawToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d).getDegrees();
 
     boolean isShootAngle = Math.abs(m_robotPoseToHubAngle) < 5;
@@ -217,7 +220,7 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Gyro Roll" , m_gyro.getAngle(IMUAxis.kRoll));
     SmartDashboard.putNumber("Gyro Pitch" , m_gyro.getAngle(IMUAxis.kPitch));
     SmartDashboard.putNumber("Angle Photon to hub" , m_robotPoseToHubAngle);
-    SmartDashboard.putNumber("Distance Photon to hub", robotToHubDistancePV);
+    SmartDashboard.putNumber("Distance Photon to hub", m_robotToHubDistancePV);
 
     /*
      * Pose2d hubPose2d = new Pose2d(hubX , hubY , new Rotation2d());
@@ -249,6 +252,10 @@ public class DriveSubsystem extends SubsystemBase {
         getHeading(),
         getModulePositions(),
         pose);
+  }
+
+  public DoubleSupplier getDistanceToHub() {
+    return () -> m_robotToHubDistancePV;
   }
 
   public Command cmdCalibrateGyro() {

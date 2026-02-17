@@ -31,9 +31,11 @@ public class ShooterSubsystem extends SubsystemBase {
   private SparkMax m_backwheelController;
   private SparkMaxConfig m_backwheelConfig;
   private double m_adjustedThrottle;
+  private DoubleSupplier m_distanceToHub;
 
-  public ShooterSubsystem() {
+  public ShooterSubsystem(DoubleSupplier distanceToHub) {
 
+    m_distanceToHub = distanceToHub;
     m_shooterController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
     m_shooterConfig = new TalonFXConfiguration();
     m_shooterConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
@@ -59,29 +61,31 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    //formula below is using knob on console, will need to be changed when we get distance and camera working
+     m_adjustedThrottle = (((m_distanceToHub.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
     SmartDashboard.putBoolean("Hub Active" , isHubActive());
     SmartDashboard.putNumber("Shooter Voltage" , m_adjustedThrottle);
     SmartDashboard.putNumber("Shooter Velocity" , m_shooterController.getVelocity().getValueAsDouble());
   }
 
-  public Command shoot(DoubleSupplier voltageSupplier) {
+  public Command shoot() {
     //return Commands.print("Shoot pew pew");
-    return Commands.run(() -> setVoltage(voltageSupplier) , this);
+    return Commands.run(() -> setVoltage() , this);
 
   }
 
-  private void setVoltage(DoubleSupplier voltageSupplier) {
-    m_adjustedThrottle = (((voltageSupplier.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
+  private void setVoltage() {
+  //  m_adjustedThrottle = (((voltageSupplier.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
     m_shooterController.setVoltage(m_adjustedThrottle);
     m_backwheelController.setVoltage(m_adjustedThrottle);
   }
 
-  public Command stopShoot(DoubleSupplier voltageSupplier) {
+  public Command stopShoot() {
    // return Commands.print("Stop shooting");
    return Commands.run(() -> {
     m_shooterController.setVoltage(0);
     m_backwheelController.setVoltage(0);
-    m_adjustedThrottle = (((voltageSupplier.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
+    //m_adjustedThrottle = (((voltageSupplier.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
    } , this);
   }
 
