@@ -130,5 +130,6 @@ public final class Constants {
     public static final double kShooterMaxVoltage = 6;
     public static final double kShooterMinVoltage = 3;
     public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
+    public static final double kShooterRampRate = 0.5;
   }
 }
