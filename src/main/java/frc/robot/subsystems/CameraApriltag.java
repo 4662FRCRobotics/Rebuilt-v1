@@ -19,7 +19,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CameraConstants;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -67,6 +69,10 @@ public class CameraApriltag extends SubsystemBase {
     }
   }
 
+  public enum ObjectType {RedHub,BlueHub,Unknown};
+  private Map < Integer,ObjectType> m_gamePieceMap = new HashMap < Integer,ObjectType> ();
+  
+
   private PhotonCamera m_aprilCameraOne;
   private boolean m_hasTargets = false;
   private PhotonTrackedTarget m_target = new PhotonTrackedTarget();
@@ -88,6 +94,18 @@ public class CameraApriltag extends SubsystemBase {
         new Rotation3d(0, name.getPitch(), 0));
     m_photonPoseEstimator = new PhotonPoseEstimator(m_fieldLayout,
         m_robotToCam);
+    m_gamePieceMap.put(2, ObjectType.RedHub);
+    m_gamePieceMap.put(5, ObjectType.RedHub);
+    m_gamePieceMap.put(8, ObjectType.RedHub);
+    m_gamePieceMap.put(9, ObjectType.RedHub);
+    m_gamePieceMap.put(10, ObjectType.RedHub);
+    m_gamePieceMap.put(11, ObjectType.RedHub);
+    m_gamePieceMap.put(18, ObjectType.BlueHub);
+    m_gamePieceMap.put(27, ObjectType.BlueHub);
+    m_gamePieceMap.put(26, ObjectType.BlueHub);
+    m_gamePieceMap.put(25, ObjectType.BlueHub);
+    m_gamePieceMap.put(24, ObjectType.BlueHub);
+    m_gamePieceMap.put(21, ObjectType.BlueHub);
   }
 
   @Override
@@ -216,6 +234,15 @@ public class CameraApriltag extends SubsystemBase {
   // method to return target id
   public int getTargetID() {
     return m_targetID;
+  }
+
+  public ObjectType getGamePieceType(){
+    ObjectType selectedobject=m_gamePieceMap.get(m_targetID);
+    if(selectedobject==null){
+      return ObjectType.Unknown;
+    } else {
+      return selectedobject;
+    }
   }
 
   // method to return the vision estimate
