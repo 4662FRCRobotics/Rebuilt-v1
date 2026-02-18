@@ -39,6 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_shooterController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
     m_shooterConfig = new TalonFXConfiguration();
     m_shooterConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    m_shooterConfig.OpenLoopRamps.withVoltageOpenLoopRampPeriod(ShooterConstants.kShooterRampRate);
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     //try config up to five times, print if failure
@@ -54,6 +55,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControllerCanId , MotorType.kBrushless);
     m_backwheelConfig = new SparkMaxConfig();
     m_backwheelConfig.inverted(false);
+    m_backwheelConfig.openLoopRampRate(ShooterConstants.kShooterRampRate);
 
     m_backwheelController.configure(m_backwheelConfig , ResetMode.kNoResetSafeParameters , PersistMode.kNoPersistParameters);
   }
