@@ -4,6 +4,18 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Feet;
@@ -78,7 +90,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private TalonFX m_flywheelController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
 
-  private SparkMax m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControllerCanID, MotorType.kBrushless);
+  private SparkMax m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControllerCanId, MotorType.kBrushless);
 
   private SmartMotorController m_smartBackwheelController =
     new SparkWrapper(m_backwheelController, DCMotor.getNEO(1), m_backwheelSMCConfig);
@@ -101,12 +113,18 @@ public class ShooterSubsystem extends SubsystemBase {
   private FlyWheel m_flywheel = new FlyWheel(m_shooterFlyWheelConfig);
   private FlyWheel m_backwheel = new FlyWheel(m_backwheelwheelConfig);
 
+  private double m_adjustedThrottle;
+  private DoubleSupplier m_distanceToHub;
+
   public AngularVelocity getFlywheelVelocity() {
     return m_flywheel.getSpeed();
   }
 
   /** Creates a new ShooterSubsystem. */
-  public ShooterSubsystem() {}
+  public ShooterSubsystem(DoubleSupplier distanceToHub) {
+    m_distanceToHub = distanceToHub;
+  }
+
 
 
   public Command setVelocitycmd(AngularVelocity speed) {
@@ -137,6 +155,8 @@ public class ShooterSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    //formula below is using knob on console, will need to be changed when we get distance and camera working
+     m_adjustedThrottle = (((m_distanceToHub.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
     SmartDashboard.putBoolean("Hub Active" , isHubActive());
     m_flywheel.updateTelemetry();
     m_backwheel.updateTelemetry();
@@ -152,13 +172,26 @@ public class ShooterSubsystem extends SubsystemBase {
     m_smartBackwheelController.simIterate();
   }
 
-  public Command shoot() {
-    return Commands.print("Shoot pew pew");
-  }
+  //public Command shoot() {
+  //  //return Commands.print("Shoot pew pew");
+  //  return Commands.run(() -> setVoltage() , this);
 
-  public Command stopShoot() {
-    return Commands.print("Stop shooting");
-  }
+  //}
+
+  //private void setVoltage() {
+  //  m_adjustedThrottle = (((voltageSupplier.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
+  //  m_shooterController.setVoltage(m_adjustedThrottle);
+  //  m_backwheelController.setVoltage(m_adjustedThrottle);
+  //}
+
+  //public Command stopShoot() {
+   // return Commands.print("Stop shooting");
+   //return Commands.run(() -> {
+   // m_shooterController.setVoltage(0);
+   // m_backwheelController.setVoltage(0);
+    //m_adjustedThrottle = (((voltageSupplier.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
+   //} , this);
+  //}
 
   private boolean isHubActive() {
     var alliance = DriverStation.getAlliance();

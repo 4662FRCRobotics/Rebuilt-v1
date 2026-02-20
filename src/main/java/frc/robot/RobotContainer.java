@@ -19,6 +19,7 @@ import static edu.wpi.first.units.Units.RPM;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -39,10 +40,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
+    private final CommandGenericHID m_ConsoleTeleop = 
+    new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+  
   private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
   private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem(m_CameraFront);
   private final IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem();
-  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem();
+ // private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(m_DriveSubsystem.getDistanceToHub());
+  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(() -> m_ConsoleTeleop.getHID().getRawAxis(0));
   private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem();
   private final ConsoleAuto m_ConsoleAuto = new ConsoleAuto(OperatorConstants.kAutoConsolePort);
   private final AutonomousSubsystem m_AutonomousSubsystem = new AutonomousSubsystem(m_ConsoleAuto, this, m_DriveSubsystem, m_ShooterSubsystem, m_IntakeSubsystem, m_ClimberSubsystem);
@@ -50,8 +55,8 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
   
-  private final CommandGenericHID m_ConsoleTeleop = 
-    new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+ // private final CommandGenericHID m_ConsoleTeleop = 
+    //new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
   
   private static boolean m_runAutoConsole;
 
@@ -75,6 +80,7 @@ public class RobotContainer {
 
           m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.setcmd(0));
       }
+
       // Pathplanner Events
       private void registerNamedCommands() {
         NamedCommands.registerCommand("Camera Pose Reset" , m_CameraFront.cmdUseCameraPose());
@@ -126,7 +132,9 @@ public class RobotContainer {
       .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
 
     m_driverController.rightTrigger()
-      .whileTrue(m_ShooterSubsystem.setVelocitycmd(RPM.of(2000)));
+      .whileTrue(m_DriveSubsystem.cmdTurnToHub()
+      .unless(() -> m_driverController.getHID().getBButton())
+      .andThen(m_ShooterSubsystem.setVelocitycmd(RPM.of(2000))));  
 
     m_driverController.povUp()
       .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
