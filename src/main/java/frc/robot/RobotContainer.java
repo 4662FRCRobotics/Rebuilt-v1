@@ -4,12 +4,14 @@
 
 package frc.robot;
 
+import frc.robot.Constants.HopperConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.libraries.ConsoleAuto;
 import frc.robot.subsystems.AutonomousSubsystem;
 import frc.robot.subsystems.CameraApriltag;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.HopperSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.CameraApriltag.CameraName;
@@ -43,6 +45,7 @@ public class RobotContainer {
   private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
   private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem(m_CameraFront);
   private final IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem();
+  private final HopperSubsystem m_HopperSubsystem = new HopperSubsystem();
   // private final ShooterSubsystem m_ShooterSubsystem = new
   // ShooterSubsystem(m_DriveSubsystem.getDistanceToHub());
   private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(
@@ -81,6 +84,8 @@ public class RobotContainer {
     m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot());
 
     m_IntakeSubsystem.setDefaultCommand(m_IntakeSubsystem.stopCmd());
+
+    m_HopperSubsystem.setDefaultCommand(m_HopperSubsystem.gateClosecmd());
 
 
   }
@@ -141,7 +146,8 @@ public class RobotContainer {
     m_driverController.rightTrigger()
         .whileTrue(m_DriveSubsystem.cmdTurnToHub()
             .unless(() -> m_driverController.getHID().getBButton())
-            .andThen(m_ShooterSubsystem.shoot()));
+            .andThen(Commands.parallel(m_ShooterSubsystem.shoot() , 
+            Commands.sequence(Commands.waitSeconds(HopperConstants.kGateOpenLagSeconds) , m_HopperSubsystem.gateOpencmd()))));
 
     m_driverController.povUp()
         .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));

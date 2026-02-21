@@ -132,4 +132,20 @@ public final class Constants {
     public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
     public static final double kShooterRampRate = 0.5;
   }
+
+  public static final class IntakeConstants {
+    public static final int kDrawbridgeControllerCanID = 30;
+    public static final int kSpinnerControllerCanID = 31;
+    public static final double kDrawbridgeVoltage = 4;
+    public static final double kSpinnerVoltage = 5;
+    public static final double kDrawbridgeRampRate = 0;
+    public static final double kSpinnerRampRate = 0;
+  }
+
+  public static final class HopperConstants {
+    public static final int kGatePort = 1;
+    public static final double kGateOpenDegrees = 0;
+    public static final double kGateClosedDegrees = 90;
+    public static final double kGateOpenLagSeconds = 1;
+  }
 }
