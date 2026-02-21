@@ -38,24 +38,26 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-    private final CommandGenericHID m_ConsoleTeleop = 
-    new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
-  
+  private final CommandGenericHID m_ConsoleTeleop = new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+
   private final CameraApriltag m_CameraFront = new CameraApriltag(CameraName.CAMERA_ONE);
   private final DriveSubsystem m_DriveSubsystem = new DriveSubsystem(m_CameraFront);
   private final IntakeSubsystem m_IntakeSubsystem = new IntakeSubsystem();
- // private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(m_DriveSubsystem.getDistanceToHub());
-  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(() -> m_ConsoleTeleop.getHID().getRawAxis(0));
+  // private final ShooterSubsystem m_ShooterSubsystem = new
+  // ShooterSubsystem(m_DriveSubsystem.getDistanceToHub());
+  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(
+      () -> m_ConsoleTeleop.getHID().getRawAxis(0));
   private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem();
   private final ConsoleAuto m_ConsoleAuto = new ConsoleAuto(OperatorConstants.kAutoConsolePort);
-  private final AutonomousSubsystem m_AutonomousSubsystem = new AutonomousSubsystem(m_ConsoleAuto, this, m_DriveSubsystem, m_ShooterSubsystem, m_IntakeSubsystem, m_ClimberSubsystem);
+  private final AutonomousSubsystem m_AutonomousSubsystem = new AutonomousSubsystem(m_ConsoleAuto, this,
+      m_DriveSubsystem, m_ShooterSubsystem, m_IntakeSubsystem, m_ClimberSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
-  
- // private final CommandGenericHID m_ConsoleTeleop = 
-    //new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
-  
+
+  // private final CommandGenericHID m_ConsoleTeleop =
+  // new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
+
   private static boolean m_runAutoConsole;
 
   /**
@@ -63,29 +65,32 @@ public class RobotContainer {
    */
   public RobotContainer() {
     registerNamedCommands();
-        // Configure the trigger bindings
-        configureBindings();
-          m_DriveSubsystem.setDefaultCommand(
-            // The left stick controls translation of the robot.
-            // Turning is controlled by the X axis of the right stick.
-            new RunCommand(
-                () -> m_DriveSubsystem.drive(
-                    -MathUtil.applyDeadband(m_driverController.getLeftY(), OperatorConstants.kDriveDeadband),
-                    -MathUtil.applyDeadband(m_driverController.getLeftX(), OperatorConstants.kDriveDeadband),
-                    -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
-                    m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
-                m_DriveSubsystem));
+    // Configure the trigger bindings
+    configureBindings();
+    m_DriveSubsystem.setDefaultCommand(
+        // The left stick controls translation of the robot.
+        // Turning is controlled by the X axis of the right stick.
+        new RunCommand(
+            () -> m_DriveSubsystem.drive(
+                -MathUtil.applyDeadband(m_driverController.getLeftY(), OperatorConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getLeftX(), OperatorConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(m_driverController.getRightX(), OperatorConstants.kDriveDeadband),
+                m_ConsoleTeleop.getHID().getRawButton(OperatorConstants.kFieldDriveButton)),
+            m_DriveSubsystem));
 
-          m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot());
+    m_ShooterSubsystem.setDefaultCommand(m_ShooterSubsystem.stopShoot());
 
-      }
+    m_IntakeSubsystem.setDefaultCommand(m_IntakeSubsystem.stopCmd());
 
-      // Pathplanner Events
-      private void registerNamedCommands() {
-        NamedCommands.registerCommand("Camera Pose Reset" , m_CameraFront.cmdUseCameraPose());
-      }
-    
-      /**
+
+  }
+
+  // Pathplanner Events
+  private void registerNamedCommands() {
+    NamedCommands.registerCommand("Camera Pose Reset", m_CameraFront.cmdUseCameraPose());
+  }
+
+  /**
    * Use this method to define your trigger->command mappings. Triggers can be
    * created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
@@ -101,52 +106,54 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-         runAutoConsoleFalse();
-    //new Trigger(DriverStation::isDisabled)
-    //new Trigger(RobotModeTriggers.disabled())
+    runAutoConsoleFalse();
+    // new Trigger(DriverStation::isDisabled)
+    // new Trigger(RobotModeTriggers.disabled())
     new Trigger(trgAutoSelect())
-      .whileTrue(m_AutonomousSubsystem.selectAuto());
+        .whileTrue(m_AutonomousSubsystem.selectAuto());
     runAutoConsoleTrue();
 
     new Trigger(RobotModeTriggers.disabled())
-      .onTrue(Commands.runOnce(this::runAutoConsoleTrue)
-        .ignoringDisable(true))
-      ;
+        .onTrue(Commands.runOnce(this::runAutoConsoleTrue)
+            .ignoringDisable(true));
 
     new Trigger(RobotModeTriggers.disabled())
-    .onFalse(Commands.runOnce(this::runAutoConsoleFalse))
-    ;
+        .onFalse(Commands.runOnce(this::runAutoConsoleFalse));
 
     m_driverController.x()
         .whileTrue(new RunCommand(
             () -> m_DriveSubsystem.setX(),
             m_DriveSubsystem));
 
-   /*  m_driverController.y()
-        .onTrue(new InstantCommand(
-            () -> m_DriveSubsystem.zeroHeading(),
-            m_DriveSubsystem));*/
+    /*
+     * m_driverController.y()
+     * .onTrue(new InstantCommand(
+     * () -> m_DriveSubsystem.zeroHeading(),
+     * m_DriveSubsystem));
+     */
 
     m_driverController.leftTrigger()
-      .whileTrue(m_IntakeSubsystem.runIn().andThen(m_IntakeSubsystem.stop()));
+        .whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
+
+    m_driverController.leftBumper()
+      .whileTrue(m_IntakeSubsystem.retractCmd());
 
     m_driverController.rightTrigger()
-      .whileTrue(m_DriveSubsystem.cmdTurnToHub()
-      .unless(() -> m_driverController.getHID().getBButton())
-      .andThen(m_ShooterSubsystem.shoot())
-      );
+        .whileTrue(m_DriveSubsystem.cmdTurnToHub()
+            .unless(() -> m_driverController.getHID().getBButton())
+            .andThen(m_ShooterSubsystem.shoot()));
 
     m_driverController.povUp()
-      .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
+        .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
 
     m_driverController.povDown()
-      .whileTrue(m_ClimberSubsystem.retract().andThen(m_ClimberSubsystem.stop()));
+        .whileTrue(m_ClimberSubsystem.retract().andThen(m_ClimberSubsystem.stop()));
 
     m_ConsoleTeleop.button(2)
-      .onTrue(m_CameraFront.cmdUseCameraPose());
+        .onTrue(m_CameraFront.cmdUseCameraPose());
 
     m_ConsoleTeleop.button(3)
-      .onTrue(m_CameraFront.cmdUseCameraYaw());
+        .onTrue(m_CameraFront.cmdUseCameraYaw());
   }
 
   /**
@@ -160,7 +167,7 @@ public class RobotContainer {
   }
 
   private static Trigger trgAutoSelect() {
-    //System.out.println("bool auto console" + m_runAutoConsole);
+    // System.out.println("bool auto console" + m_runAutoConsole);
     return new Trigger(() -> m_runAutoConsole);
   }
 

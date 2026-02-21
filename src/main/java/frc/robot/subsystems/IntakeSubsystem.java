@@ -17,11 +17,19 @@ public class IntakeSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public Command runIn() {
-    return Commands.print("Intake");
+  public Command runInCmd() {
+    return Commands.run(() -> System.out.println("Intake"), this);
   }
 
-  public Command stop() {
-    return Commands.print("Stop Intake");
+  public Command stopCmd() {
+    return Commands.runOnce(() -> System.out.println("Stop Intake"), this);
+  }
+
+  public Command deployCmd() {
+    return Commands.runOnce(() -> System.out.println("deploy Intake"), this);
+  }
+
+  public Command retractCmd(){
+    return Commands.runOnce(() -> System.out.println("retractIntake"), this);
   }
 }
