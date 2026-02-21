@@ -10,24 +10,24 @@ import frc.robot.libraries.ConsoleAuto;
 
 // Something interesting I found was DriverStation.getMatchTime() It returns how much time is left, might be useful.
 
-public class AutonomousSubsystem extends SubsystemBase{
+public class AutonomousSubsystem extends SubsystemBase {
 
   // limited by the rotary switch settings of 6 and POV max of 8.
   public enum AutoPlan {
-   // DRIVEOUT,
+    // DRIVEOUT,
     CENTER,
     LEFT,
-    RIGHT
-    ;
+    RIGHT;
 
-    /*public String getSelectName() {
-        return this.toString();
-    }
-
-    public int getSelectIx() {
-        return this.ordinal();
-    }
-        */
+    /*
+     * public String getSelectName() {
+     * return this.toString();
+     * }
+     * 
+     * public int getSelectIx() {
+     * return this.ordinal();
+     * }
+     */
   }
 
   /*
@@ -40,7 +40,7 @@ public class AutonomousSubsystem extends SubsystemBase{
    * Switch False: switch number that will turn off this step if true
    * 
    * tbd - auto or path names to coordinate with PathPlanner routines
-   * for 2025 the first path must be an Auto that sets the starting pose 
+   * for 2025 the first path must be an Auto that sets the starting pose
    * after that they should be paths only
    */
   public enum AutoStep {
@@ -49,12 +49,11 @@ public class AutonomousSubsystem extends SubsystemBase{
     WAITLOOP("Wait", 99.9),
     DRIVE_LEFT_TRENCH("Drive Plan", "Left Trench"),
     DRIVE_LEFT_DEPOT("Drive Plan", "Left Depot"),
-    DRVIE_CENTER_DEPOT("Drive Plan" , "Center Depot"),
-    DRIVE_RIGHT_TRENCH("Drive Plan" , "Right Trench"),
-    DRIVE_RIGHT_OUTPOST("Drive Plan" , "Right Outpost"),
-    SHOOT_RETURN("Shoot" , "return"),
-    SHOOT_INITIAL("Shoot" , "initial")
-    ;
+    DRIVE_CENTER_DEPOT("Drive Plan", "Center Depot"),
+    DRIVE_RIGHT_TRENCH("Drive Plan", "Right Trench"),
+    DRIVE_RIGHT_OUTPOST("Drive Plan", "Right Outpost"),
+    SHOOT_RETURN("Shoot", "return"),
+    SHOOT_INITIAL("Shoot", "initial");
 
     private final String m_cmdType;
     private final double m_waitTime;
@@ -103,11 +102,12 @@ public class AutonomousSubsystem extends SubsystemBase{
    * the True switch must be on (true)
    * the False switch must be off (false)
    * 
-   * The False switch is there to provide two path options 
-   * e.g. step 3 and step 5 are mutually exclusive, to one switch is selecting between them
+   * The False switch is there to provide two path options
+   * e.g. step 3 and step 5 are mutually exclusive, to one switch is selecting
+   * between them
    * 
    */
-  private class PlanStep{
+  private class PlanStep {
     private AutoStep m_autoStep;
     private int m_switchTrue;
     private int m_switchFalse;
@@ -167,7 +167,6 @@ public class AutonomousSubsystem extends SubsystemBase{
   private String[] m_strStepSwitch = new String[kSTEP_MAX];
   private boolean[] m_bStepSWList = new boolean[kSTEP_MAX];
 
-
   private int m_iPatternSelect;
 
   private PlanStep[][] m_planSteps;
@@ -178,11 +177,11 @@ public class AutonomousSubsystem extends SubsystemBase{
    * 
    */
   public AutonomousSubsystem(ConsoleAuto consoleAuto,
-        RobotContainer robotContainer,
-        DriveSubsystem drive,
-        ShooterSubsystem shooter,
-        IntakeSubsystem intake,
-        ClimberSubsystem climber) {
+      RobotContainer robotContainer,
+      DriveSubsystem drive,
+      ShooterSubsystem shooter,
+      IntakeSubsystem intake,
+      ClimberSubsystem climber) {
 
     m_ConsoleAuto = consoleAuto;
     m_robotContainer = robotContainer;
@@ -199,36 +198,41 @@ public class AutonomousSubsystem extends SubsystemBase{
       initStepList(iat);
       fmtDisplay(iat);
     }
-  
-/*
- *  CRITICAL PIECE
- * This two dimensional array defines the steps for each selectable Auto Plan
- * First dimension is set by the ConsoleAuto selector switch (passed in via POV 0)
- * Second dimension is the sequence of the possible step(s) for the pattern
- * 
- * data elements are from the AutoStep ENUM of steps, run if true switch, and run if false switch
- * the switch numbers are optional, although if the false one is used, then the true is required
- * 
- */
-    m_planSteps = new PlanStep[][] { 
-      //CENTER, DEPOT
-          {new PlanStep(AutoStep.WAITLOOP), 
-            new PlanStep(AutoStep.SHOOT_INITIAL , 1), 
-            new PlanStep(AutoStep.DRVIE_CENTER_DEPOT , 2)
-          },
-      //LEFT
-          {new PlanStep(AutoStep.WAITLOOP),
-             new PlanStep(AutoStep.SHOOT_INITIAL, 1),
-             new PlanStep(AutoStep.DRIVE_LEFT_TRENCH, 2)
-          },
-      //RIGHT
-          {new PlanStep(AutoStep.WAITLOOP),
-            new PlanStep(AutoStep.SHOOT_INITIAL , 1),
-            new PlanStep(AutoStep.DRIVE_RIGHT_TRENCH , 2)
-          }
+
+    /*
+     * CRITICAL PIECE
+     * This two dimensional array defines the steps for each selectable Auto Plan
+     * First dimension is set by the ConsoleAuto selector switch (passed in via POV
+     * 0)
+     * Second dimension is the sequence of the possible step(s) for the pattern
+     * 
+     * data elements are from the AutoStep ENUM of steps, run if true switch, and
+     * run if false switch
+     * the switch numbers are optional, although if the false one is used, then the
+     * true is required
+     * 
+     */
+    m_planSteps = new PlanStep[][] {
+        // CENTER, DEPOT
+        { new PlanStep(AutoStep.WAITLOOP),
+            new PlanStep(AutoStep.SHOOT_INITIAL, 1),
+            new PlanStep(AutoStep.DRIVE_CENTER_DEPOT, 2)
+        },
+        // LEFT
+        { new PlanStep(AutoStep.WAITLOOP),
+            new PlanStep(AutoStep.SHOOT_INITIAL, 1),
+            new PlanStep(AutoStep.DRIVE_LEFT_TRENCH, 2),
+            new PlanStep(AutoStep.DRIVE_LEFT_DEPOT, 3, 2)
+        },
+        // RIGHT
+        { new PlanStep(AutoStep.WAITLOOP),
+            new PlanStep(AutoStep.SHOOT_INITIAL, 1),
+            new PlanStep(AutoStep.DRIVE_RIGHT_TRENCH, 2),
+            new PlanStep(AutoStep.DRIVE_RIGHT_OUTPOST, 3, 2)
+        }
     };
 
-    if (m_autoStep.length < m_planSteps.length ) {
+    if (m_autoStep.length < m_planSteps.length) {
       System.out.println("WARNING - Auto Commands LT Command Steps");
     }
     // more? like more commands than supported by the switch
@@ -236,7 +240,7 @@ public class AutonomousSubsystem extends SubsystemBase{
   }
 
   private void fmtDisplay(int ix) {
-  
+
     String labelName = "Step " + ix;
 
     labelName = "Step " + ix;
@@ -247,33 +251,33 @@ public class AutonomousSubsystem extends SubsystemBase{
 
     labelName = "SwState " + ix;
     SmartDashboard.putBoolean(labelName, m_bStepSWList[ix]);
-  
+
   }
 
   private void initStepList(int ix) {
-      m_strStepList[ix] = "";
-      m_strStepSwitch[ix] = "";
-      m_bStepSWList[ix] = false;
+    m_strStepList[ix] = "";
+    m_strStepSwitch[ix] = "";
+    m_bStepSWList[ix] = false;
   }
 
   @Override
   public void periodic() {
-  // This method will be called once per scheduler run
+    // This method will be called once per scheduler run
     SmartDashboard.putString("Selected Pattern", m_selectedPlanName);
     SmartDashboard.putNumber("WaitLoop", m_iWaitCount);
     for (int iat = 0; iat < kSTEP_MAX; iat++) {
       fmtDisplay(iat);
     }
   }
-   
-/*
- * method to handle building the plan step selection
- * called by command running while disabled
- * 
- * saves the possible steps for the selected AutoPlan
- * tests true/false switches to set step selection
- * 
- */
+
+  /*
+   * method to handle building the plan step selection
+   * called by command running while disabled
+   * 
+   * saves the possible steps for the selected AutoPlan
+   * tests true/false switches to set step selection
+   * 
+   */
   public void selectAutoCommand() {
 
     m_iPatternSelect = m_ConsoleAuto.getROT_SW_0();
@@ -315,7 +319,7 @@ public class AutonomousSubsystem extends SubsystemBase{
     }
     return stepSwName;
   }
-    
+
   /*
    * return true/false for step selection based on switch settings
    */
@@ -332,31 +336,31 @@ public class AutonomousSubsystem extends SubsystemBase{
     return stepBool;
   }
 
-
   /*
    * Command to run the Auto selection process with Operator Console interaction
    * This should be handled by a trigger that is started on Disabled status
    */
   public Command selectAuto() {
     return Commands.run(this::selectAutoCommand, this)
-          .ignoringDisable(true);
+        .ignoringDisable(true);
   }
 
   /*
    * Command to process the selected command list
    * 
-   * creates a sequential command group of all selected commands for the auto pattern
-   * returns the group 
+   * creates a sequential command group of all selected commands for the auto
+   * pattern
+   * returns the group
    * 
-  */
+   */
   public Command runAuto() {
 
     SequentialCommandGroup autoCmd = new SequentialCommandGroup();
 
     for (int ix = 0; ix < m_planSteps[m_iPatternSelect].length; ix++) {
       if (m_bStepSWList[ix]) {
-        //System.out.print("Selected command " + ix);
-        //System.out.println("-" + m_strStepList[ix]);
+        // System.out.print("Selected command " + ix);
+        // System.out.println("-" + m_strStepList[ix]);
         autoCmd.addCommands(Commands.print("Starting: " + m_strStepList[ix]));
         autoCmd.addCommands(autoStepCmd(m_autoStep[ix].getAutoStep()));
         autoCmd.addCommands(Commands.print("Just completed: " + m_strStepList[ix]));
@@ -364,7 +368,7 @@ public class AutonomousSubsystem extends SubsystemBase{
     }
 
     return autoCmd;
-   
+
   }
 
   /*
@@ -386,16 +390,24 @@ public class AutonomousSubsystem extends SubsystemBase{
 
         break;
       case "Drive Plan":
-        workCmd =  m_drive.getPathStep(autoStep.getActionName());
+        workCmd = m_drive.getPathStep(autoStep.getActionName());
         break;
       case "Shoot":
-        // build sequence to raise elevator, move hand up, and wait until elevator is in position
-        workCmd = m_shooter.shoot().withTimeout(9);
+        // build sequence to raise elevator, move hand up, and wait until elevator is in
+        // position
+        if (autoStep.getActionName() == "intial") {
+          // basic workcmd goes here
+          workCmd = m_shooter.shoot().withTimeout(9);
+        } else {
+          // extended command with autoalign goes here
+          workCmd = m_drive.cmdTurnToHub()
+              .andThen(m_shooter.shoot().withTimeout(10));
+        }
         break;
       default:
         break;
     }
     return workCmd;
   }
-  
+
 }
