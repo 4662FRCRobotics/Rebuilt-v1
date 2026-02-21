@@ -185,6 +185,7 @@ public class DriveSubsystem extends SubsystemBase {
     double hubY = 0;
     double hubPose = 0;
     Pose2d hubPose2d = new Pose2d();
+    boolean haveTarget = false;
 
     var alliance = DriverStation.getAlliance();
     if (alliance.isPresent()) {
@@ -192,12 +193,12 @@ public class DriveSubsystem extends SubsystemBase {
         hubX = DriveConstants.kHubRedX;
         hubY = DriveConstants.kHubRedY;
         hubPose = DriveConstants.kHubRedPose;
+        haveTarget = true;
       } else if ( m_CameraFront.getGamePieceType()==ObjectType.BlueHub) {
-        
-      
         hubX = DriveConstants.kHubBlueX;
         hubY = DriveConstants.kHubBlueY;
         hubPose = DriveConstants.kHubBluePose;
+        haveTarget = true;
       }
       hubPose2d = new Pose2d(hubX , hubY , Rotation2d.fromDegrees(hubPose));
     }
@@ -205,7 +206,7 @@ public class DriveSubsystem extends SubsystemBase {
     double robotToHubX = 0;
     double robotToHubY = 0;
 
-    if (m_CameraFront.getGamePieceType() == ObjectType.RedHub || m_CameraFront.getGamePieceType() == ObjectType.BlueHub) {
+    if (haveTarget) {
       robotToHubX = m_poseEstimator.getEstimatedPosition().getX() - hubX;
       robotToHubY = m_poseEstimator.getEstimatedPosition().getY() - hubY;
    // double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
