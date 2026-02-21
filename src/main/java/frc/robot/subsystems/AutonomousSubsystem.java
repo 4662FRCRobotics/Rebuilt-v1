@@ -48,10 +48,12 @@ public class AutonomousSubsystem extends SubsystemBase{
     WAIT2("Wait", 2.0),
     WAITLOOP("Wait", 99.9),
     DRIVE_LEFT_TRENCH("Drive Plan", "Left Trench"),
-    DRIVE_CENTER_CLIMB("Drive Plan", "Center Climb"),
-    SHOOT_LONG("Shoot" , "long"),
+    DRIVE_LEFT_DEPOT("Drive Plan", "Left Depot"),
+    DRVIE_CENTER_DEPOT("Drive Plan" , "Center Depot"),
     DRIVE_RIGHT_TRENCH("Drive Plan" , "Right Trench"),
-    SHOOT_SHORT("Shoot" , "short")
+    DRIVE_RIGHT_OUTPOST("Drive Plan" , "Right Outpost"),
+    SHOOT_RETURN("Shoot" , "return"),
+    SHOOT_INITIAL("Shoot" , "initial")
     ;
 
     private final String m_cmdType;
@@ -209,19 +211,19 @@ public class AutonomousSubsystem extends SubsystemBase{
  * 
  */
     m_planSteps = new PlanStep[][] { 
-      //CENTER
+      //CENTER, DEPOT
           {new PlanStep(AutoStep.WAITLOOP), 
-            new PlanStep(AutoStep.SHOOT_SHORT , 1), 
-            new PlanStep(AutoStep.DRIVE_CENTER_CLIMB , 2)
+            new PlanStep(AutoStep.SHOOT_INITIAL , 1), 
+            new PlanStep(AutoStep.DRVIE_CENTER_DEPOT , 2)
           },
       //LEFT
           {new PlanStep(AutoStep.WAITLOOP),
-             new PlanStep(AutoStep.SHOOT_LONG, 1),
+             new PlanStep(AutoStep.SHOOT_INITIAL, 1),
              new PlanStep(AutoStep.DRIVE_LEFT_TRENCH, 2)
           },
       //RIGHT
           {new PlanStep(AutoStep.WAITLOOP),
-            new PlanStep(AutoStep.SHOOT_SHORT , 1),
+            new PlanStep(AutoStep.SHOOT_INITIAL , 1),
             new PlanStep(AutoStep.DRIVE_RIGHT_TRENCH , 2)
           }
     };
@@ -388,7 +390,7 @@ public class AutonomousSubsystem extends SubsystemBase{
         break;
       case "Shoot":
         // build sequence to raise elevator, move hand up, and wait until elevator is in position
-        workCmd = m_shooter.shoot();
+        workCmd = m_shooter.shoot().withTimeout(9);
         break;
       default:
         break;
