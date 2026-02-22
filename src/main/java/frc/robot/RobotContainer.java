@@ -17,6 +17,8 @@ import frc.robot.subsystems.CameraApriltag.CameraName;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -62,6 +64,8 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    WebServer.start(5800 , Filesystem.getDeployDirectory().getPath());
+    
     registerNamedCommands();
         // Configure the trigger bindings
         configureBindings();
