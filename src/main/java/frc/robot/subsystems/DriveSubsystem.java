@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.subsystems.CameraApriltag.ObjectType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -184,28 +185,39 @@ public class DriveSubsystem extends SubsystemBase {
     double hubY = 0;
     double hubPose = 0;
     Pose2d hubPose2d = new Pose2d();
+    boolean haveTarget = false;
 
     var alliance = DriverStation.getAlliance();
     if (alliance.isPresent()) {
-      if (alliance.get() == DriverStation.Alliance.Red) {
+      if (alliance.get() == DriverStation.Alliance.Red && m_CameraFront.getGamePieceType()==ObjectType.RedHub) {
         hubX = DriveConstants.kHubRedX;
         hubY = DriveConstants.kHubRedY;
         hubPose = DriveConstants.kHubRedPose;
-      } else {
+        haveTarget = true;
+      } else if ( m_CameraFront.getGamePieceType()==ObjectType.BlueHub) {
         hubX = DriveConstants.kHubBlueX;
         hubY = DriveConstants.kHubBlueY;
         hubPose = DriveConstants.kHubBluePose;
+        haveTarget = true;
       }
       hubPose2d = new Pose2d(hubX , hubY , Rotation2d.fromDegrees(hubPose));
     }
 
-    double robotToHubX = m_poseEstimator.getEstimatedPosition().getX() - hubX;
-    double robotToHubY = m_poseEstimator.getEstimatedPosition().getY() - hubY;
+    double robotToHubX = 0;
+    double robotToHubY = 0;
+
+    if (haveTarget) {
+      robotToHubX = m_poseEstimator.getEstimatedPosition().getX() - hubX;
+      robotToHubY = m_poseEstimator.getEstimatedPosition().getY() - hubY;
    // double robotToHubDistance = Math.sqrt(robotToHubX * robotToHubX + robotToHubY * robotToHubY);
     //double robotToHubAngle = Math.toDegrees(Math.atan(robotToHubY / robotToHubX));
     //m_robotPoseToHubAngle = Math.abs(robotPoseDeg - robotToHubAngle) - hubPose;
-    m_robotToHubDistancePV = PhotonUtils.getDistanceToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d);
-    m_robotPoseToHubAngle = PhotonUtils.getYawToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d).getDegrees();
+      m_robotToHubDistancePV = PhotonUtils.getDistanceToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d);
+      m_robotPoseToHubAngle = PhotonUtils.getYawToPose(m_poseEstimator.getEstimatedPosition(), hubPose2d).getDegrees();
+  } else {
+      m_robotToHubDistancePV = 0;
+      m_robotPoseToHubAngle = 0;
+  }
 
     boolean isShootAngle = Math.abs(m_robotPoseToHubAngle) < 5;
 
