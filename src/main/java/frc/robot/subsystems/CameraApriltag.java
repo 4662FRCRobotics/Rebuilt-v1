@@ -32,7 +32,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 public class CameraApriltag extends SubsystemBase {
 
   public enum CameraName {
-    CAMERA_ONE("Arducam_OV9281_USB_Camera", 0, 0, 0, Math.toRadians(25));
+    CAMERA_ONE("Arducam_OV9281_USB_Camera", 0.23, -0.255, 0.415, Math.toRadians(25));
 
     private final String m_cameraName;
     private final double m_x;
