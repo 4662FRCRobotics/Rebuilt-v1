@@ -452,6 +452,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   private void turnEnd(boolean interrupted) {
     System.out.println("Align Turn Ended");
+    drive(0 , 0 , 0 , false);
   }
 
   private boolean turnIsFinished() {

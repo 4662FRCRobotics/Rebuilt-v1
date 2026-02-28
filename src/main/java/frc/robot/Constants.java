@@ -68,7 +68,7 @@ public final class Constants {
     public static final double kHubBluePose = 0;
     public static final double kHubRedPose = 180;
 
-    public static final double kTurnP = 2.0;
+    public static final double kTurnP = 1.0;
     public static final double kTurnI = 0.0;
     public static final double kTurnD = 0.0;
     public static final double kMinOmega = 10.0;
