@@ -127,7 +127,7 @@ public final class Constants {
   public static final class ShooterConstants {
     public static final int kFlywheelControllerCanId = 20;
     public static final int kBackwheelControllerCanId = 21;
-    public static final double kShooterMaxVoltage = 8;
+    public static final double kShooterMaxVoltage = 7;
     public static final double kShooterMinVoltage = 4.5;
     public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
     public static final double kShooterRampRate = 0.5;
