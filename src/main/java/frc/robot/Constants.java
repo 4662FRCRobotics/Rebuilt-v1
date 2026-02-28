@@ -68,10 +68,10 @@ public final class Constants {
     public static final double kHubBluePose = 0;
     public static final double kHubRedPose = 180;
 
-    public static final double kTurnP = 1.0;
+    public static final double kTurnP = 0.5;
     public static final double kTurnI = 0.0;
     public static final double kTurnD = 0.0;
-    public static final double kMinOmega = 10.0;
+    //public static final double kMinOmega = 10.0;
     public static final double kTurnTolerance = 1;
   }
 
@@ -128,7 +128,7 @@ public final class Constants {
     public static final int kFlywheelControllerCanId = 20;
     public static final int kBackwheelControllerCanId = 21;
     public static final double kShooterMaxVoltage = 8;
-    public static final double kShooterMinVoltage = 5;
+    public static final double kShooterMinVoltage = 4.5;
     public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
     public static final double kShooterRampRate = 0.5;
   }
@@ -144,8 +144,8 @@ public final class Constants {
 
   public static final class HopperConstants {
     public static final int kGatePort = 1;
-    public static final double kGateOpenDegrees = 0;
+    public static final double kGateOpenDegrees = 30;
     public static final double kGateClosedDegrees = 90;
-    public static final double kGateOpenLagSeconds = 1;
+    public static final double kGateOpenLagSeconds = 0.6;
   }
 }

@@ -446,7 +446,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   private void turnExec() {
-    double rotation = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -0.5, 0.5);
+    double rotation = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -0.4, 0.4);
     drive(0, 0, rotation, false);
   }
 

@@ -25,13 +25,13 @@ public class HopperSubsystem extends SubsystemBase {
   }
 
   public Command gateOpencmd() {
-    return Commands.run(() -> {System.out.print("open gate"); 
+    return Commands.run(() -> { 
     m_gate.setAngle(HopperConstants.kGateOpenDegrees);}
     , this);
   }
 
   public Command gateClosecmd() {
-    return Commands.runOnce(() -> {System.out.print("close gate"); m_gate.setAngle(HopperConstants.kGateClosedDegrees);}
+    return Commands.runOnce(() -> {m_gate.setAngle(HopperConstants.kGateClosedDegrees);}
     , this);
   }  
 }
