@@ -446,12 +446,13 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   private void turnExec() {
-    double rotation = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -0.5, 0.5);
+    double rotation = MathUtil.clamp(m_turnPIDCntrl.calculate(m_gyro.getAngle()), -0.4, 0.4);
     drive(0, 0, rotation, false);
   }
 
   private void turnEnd(boolean interrupted) {
     System.out.println("Align Turn Ended");
+    drive(0 , 0 , 0 , false);
   }
 
   private boolean turnIsFinished() {
