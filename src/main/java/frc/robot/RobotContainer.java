@@ -50,7 +50,7 @@ public class RobotContainer {
   private final HopperSubsystem m_HopperSubsystem = new HopperSubsystem();
   // private final ShooterSubsystem m_ShooterSubsystem = new
   // ShooterSubsystem(m_DriveSubsystem.getDistanceToHub());
-  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(
+  private final ShooterSubsystem m_ShooterSubsystem = new ShooterSubsystem(m_DriveSubsystem.getDistanceToHub() ,
       () -> m_ConsoleTeleop.getHID().getRawAxis(0));
   private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem();
   private final ConsoleAuto m_ConsoleAuto = new ConsoleAuto(OperatorConstants.kAutoConsolePort);

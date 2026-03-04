@@ -131,7 +131,12 @@ public final class Constants {
     public static final double kShooterMinVoltage = 4.5;
     public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
     public static final double kShooterRampRate = 0.5;
+    public static final double kShooterMaxMeters = 6.096;
+    public static final double kShooterMinMeters = 1.524;
+    public static final double kShooterRangeMeters = kShooterMaxMeters - kShooterMinMeters;
   }
+  //4.5 volts = 86 in long 5.5 ft tall, 5 volts = 118 in long, 5.5 volts = 146 in long, 6 volts = 176 in long maybe 13.5 ft tall
+  //6.5 volts = 214 in long about 11 ft tall, 7 volts = 238 in long 16 ft tall
 
   public static final class IntakeConstants {
     public static final int kDrawbridgeControllerCanID = 30;
