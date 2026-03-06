@@ -149,6 +149,7 @@ public final class Constants {
 
   public static final class HopperConstants {
     public static final int kGatePort = 1;
+    public static final int kAgitatorCanID = 40;
     public static final double kGateOpenDegrees = 30;
     public static final double kGateClosedDegrees = 90;
     public static final double kGateOpenLagSeconds = 0.6;

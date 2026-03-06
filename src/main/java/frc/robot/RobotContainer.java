@@ -142,28 +142,29 @@ public class RobotContainer {
      */
 
     m_driverController.leftTrigger()
-        .whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
+      .whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
 
     m_driverController.leftBumper()
       .whileTrue(m_IntakeSubsystem.retractCmd());
 
     m_driverController.rightTrigger()
-        .whileTrue(m_DriveSubsystem.cmdTurnToHub()
-            .unless(() -> m_driverController.getHID().getBButton())
-            .andThen(Commands.parallel(m_ShooterSubsystem.shoot() , 
-            Commands.sequence(Commands.waitSeconds(HopperConstants.kGateOpenLagSeconds) , m_HopperSubsystem.gateOpencmd()))));
+      .whileTrue(m_DriveSubsystem.cmdTurnToHub()
+        .andThen(shootCmd()));
+
+    m_driverController.rightBumper()
+      .whileTrue(shootCmd());
 
     m_driverController.povUp()
-        .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
+      .whileTrue(m_ClimberSubsystem.extend().andThen(m_ClimberSubsystem.stop()));
 
     m_driverController.povDown()
-        .whileTrue(m_ClimberSubsystem.retract().andThen(m_ClimberSubsystem.stop()));
+      .whileTrue(m_ClimberSubsystem.retract().andThen(m_ClimberSubsystem.stop()));
 
     m_ConsoleTeleop.button(2)
-        .onTrue(m_CameraFront.cmdUseCameraPose());
+      .onTrue(m_CameraFront.cmdUseCameraPose());
 
     m_ConsoleTeleop.button(3)
-        .onTrue(m_CameraFront.cmdUseCameraYaw());
+      .onTrue(m_CameraFront.cmdUseCameraYaw());
   }
 
   /**
@@ -188,4 +189,10 @@ public class RobotContainer {
   private void runAutoConsoleFalse() {
     m_runAutoConsole = false;
   }
+
+  public Command shootCmd() {
+    return Commands.parallel(m_ShooterSubsystem.shoot() , 
+           Commands.sequence(Commands.waitSeconds(HopperConstants.kGateOpenLagSeconds) , m_HopperSubsystem.gateOpencmd()));
+  }
+
 }

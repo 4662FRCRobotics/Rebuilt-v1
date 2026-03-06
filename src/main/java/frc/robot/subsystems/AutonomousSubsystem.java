@@ -393,15 +393,13 @@ public class AutonomousSubsystem extends SubsystemBase {
         workCmd = m_drive.getPathStep(autoStep.getActionName());
         break;
       case "Shoot":
-        // build sequence to raise elevator, move hand up, and wait until elevator is in
-        // position
         if (autoStep.getActionName() == "intial") {
           // basic workcmd goes here
-          workCmd = m_shooter.shoot().withTimeout(9);
+          workCmd = m_robotContainer.shootCmd().withTimeout(9);
         } else {
           // extended command with autoalign goes here
           workCmd = m_drive.cmdTurnToHub()
-              .andThen(m_shooter.shoot().withTimeout(10));
+              .andThen(m_robotContainer.shootCmd().withTimeout(10));
         }
         break;
       default:
