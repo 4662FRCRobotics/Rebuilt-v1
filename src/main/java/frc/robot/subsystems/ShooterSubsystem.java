@@ -74,12 +74,13 @@ public class ShooterSubsystem extends SubsystemBase {
     double distanceToHub = 0;
 
     if(m_driveDistanceToHub.getAsDouble() != 0) {
-      distanceToHub = m_driveDistanceToHub.getAsDouble();
+      distanceToHub = m_driveDistanceToHub.getAsDouble() * 1.15;
     } else {
-      distanceToHub = (((m_knobDistanceToHub.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRangeMeters) + ShooterConstants.kShooterMinMeters;
+      distanceToHub = (((m_knobDistanceToHub.getAsDouble() + 1.0) / 2.0) * ShooterConstants.kShooterRangeMeters) + ShooterConstants.kShooterMinMeters;
     }
 
-    m_adjustedThrottle = ((distanceToHub - 1.524) / 1.524) + 4.5;
+   // m_adjustedThrottle = ((distanceToHub - 1.524) / 1.524) + 4.5;
+    m_adjustedThrottle = ((distanceToHub - 1.524) / 1.4) + 4.5;
 
     SmartDashboard.putBoolean("Hub Active" , isHubActive());
     SmartDashboard.putNumber("Shooter Voltage" , m_adjustedThrottle);
