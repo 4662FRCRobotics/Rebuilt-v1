@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -35,6 +36,7 @@ public class IntakeSubsystem extends SubsystemBase {
     m_drawbridgeConfig = new SparkMaxConfig();
     m_drawbridgeConfig.inverted(false);
     m_drawbridgeConfig.openLoopRampRate(IntakeConstants.kDrawbridgeRampRate);
+    m_drawbridgeConfig.idleMode(IdleMode.kBrake);
     m_drawbridgeConfig.limitSwitch
       .forwardLimitSwitchType(Type.kNormallyOpen)
       .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
@@ -69,12 +71,12 @@ public class IntakeSubsystem extends SubsystemBase {
   } 
 
   public Command deployCmd() {
-    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage) , this)
-    .until(() -> m_drawbridgeForwardLimit.isPressed());
+    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage * -1) , this)
+    .until(() -> m_drawbridgeReverseLimit.isPressed());
   }
 
   public Command retractCmd(){
-    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage * -1) , this)
-    .until(() -> m_drawbridgeReverseLimit.isPressed());
+    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage) , this)
+    .until(() -> m_drawbridgeForwardLimit.isPressed());
   }
 }

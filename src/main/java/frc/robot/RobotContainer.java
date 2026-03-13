@@ -142,8 +142,9 @@ public class RobotContainer {
      */
 
     m_driverController.leftTrigger()
-      //.whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
-      .whileTrue(m_IntakeSubsystem.runInCmd());
+      .whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
+      //.whileTrue(m_IntakeSubsystem.runInCmd());
+      //.whileTrue(m_IntakeSubsystem.deployCmd());
 
     m_driverController.leftBumper()
       .whileTrue(m_IntakeSubsystem.retractCmd());
