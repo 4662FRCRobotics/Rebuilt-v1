@@ -83,7 +83,7 @@ public final class Constants {
 
     // Calculations required for driving motor conversion factors and feed forward
     public static final double kDrivingMotorFreeSpeedRps = NeoMotorConstants.kFreeSpeedRpm / 60;
-    public static final double kWheelDiameterMeters = 0.0762;
+    public static final double kWheelDiameterMeters = 0.0756;
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
     // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15
     // teeth on the bevel pinion
@@ -131,19 +131,25 @@ public final class Constants {
     public static final double kShooterMinVoltage = 4.5;
     public static final double kShooterRange = kShooterMaxVoltage - kShooterMinVoltage;
     public static final double kShooterRampRate = 0.5;
+    public static final double kShooterMaxMeters = 6.096;
+    public static final double kShooterMinMeters = 1.524;
+    public static final double kShooterRangeMeters = kShooterMaxMeters - kShooterMinMeters;
   }
+  //4.5 volts = 86 in long 5.5 ft tall, 5 volts = 118 in long, 5.5 volts = 146 in long, 6 volts = 176 in long maybe 13.5 ft tall
+  //6.5 volts = 214 in long about 11 ft tall, 7 volts = 238 in long 16 ft tall
 
   public static final class IntakeConstants {
     public static final int kDrawbridgeControllerCanID = 30;
     public static final int kSpinnerControllerCanID = 31;
     public static final double kDrawbridgeVoltage = 4;
-    public static final double kSpinnerVoltage = 5;
+    public static final double kSpinnerVoltage = 7;
     public static final double kDrawbridgeRampRate = 0;
     public static final double kSpinnerRampRate = 0;
   }
 
   public static final class HopperConstants {
     public static final int kGatePort = 1;
+    public static final int kAgitatorCanID = 40;
     public static final double kGateOpenDegrees = 30;
     public static final double kGateClosedDegrees = 90;
     public static final double kGateOpenLagSeconds = 0.6;

@@ -12,11 +12,13 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShooterConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -24,6 +26,8 @@ public class IntakeSubsystem extends SubsystemBase {
   private SparkMaxConfig m_drawbridgeConfig;
   private SparkLimitSwitch m_drawbridgeForwardLimit;
   private SparkLimitSwitch m_drawbridgeReverseLimit;
+  private SparkMax m_spinner;
+  private SparkMaxConfig m_spinnerConfig;
   
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
@@ -32,6 +36,7 @@ public class IntakeSubsystem extends SubsystemBase {
     m_drawbridgeConfig = new SparkMaxConfig();
     m_drawbridgeConfig.inverted(false);
     m_drawbridgeConfig.openLoopRampRate(IntakeConstants.kDrawbridgeRampRate);
+    m_drawbridgeConfig.idleMode(IdleMode.kBrake);
     m_drawbridgeConfig.limitSwitch
       .forwardLimitSwitchType(Type.kNormallyOpen)
       .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
@@ -43,6 +48,12 @@ public class IntakeSubsystem extends SubsystemBase {
     m_drawbridgeForwardLimit = m_drawbridgeController.getForwardLimitSwitch();
     m_drawbridgeReverseLimit = m_drawbridgeController.getReverseLimitSwitch();
 
+    m_spinner = new SparkMax(IntakeConstants.kSpinnerControllerCanID, MotorType.kBrushless);
+    m_spinnerConfig = new SparkMaxConfig();
+    m_spinnerConfig.inverted(false);
+    m_spinnerConfig.openLoopRampRate(IntakeConstants.kSpinnerRampRate);
+    m_spinnerConfig.smartCurrentLimit(50);
+
   }
 
   @Override
@@ -51,20 +62,21 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command runInCmd() {
-    return Commands.run(() -> System.out.println("Intake") , this);
+    return Commands.run(() -> m_spinner.setVoltage(IntakeConstants.kSpinnerVoltage) , this);
   }
 
   public Command stopCmd() {
-    return Commands.run(() -> m_drawbridgeController.setVoltage(0) , this);
+    return Commands.run(() -> {m_drawbridgeController.setVoltage(0);
+      m_spinner.setVoltage(0);} , this);
   } 
 
   public Command deployCmd() {
-    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage) , this)
-    .until(() -> m_drawbridgeForwardLimit.isPressed());
+    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage * -1) , this)
+    .until(() -> m_drawbridgeReverseLimit.isPressed());
   }
 
   public Command retractCmd(){
-    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage * -1) , this)
-    .until(() -> m_drawbridgeReverseLimit.isPressed());
+    return Commands.run(() -> m_drawbridgeController.setVoltage(IntakeConstants.kDrawbridgeVoltage) , this)
+    .until(() -> m_drawbridgeForwardLimit.isPressed());
   }
 }

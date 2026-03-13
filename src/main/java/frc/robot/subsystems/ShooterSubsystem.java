@@ -16,6 +16,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,15 +32,19 @@ public class ShooterSubsystem extends SubsystemBase {
   private SparkMax m_backwheelController;
   private SparkMaxConfig m_backwheelConfig;
   private double m_adjustedThrottle;
-  private DoubleSupplier m_distanceToHub;
+  private DoubleSupplier m_driveDistanceToHub;
+  private DoubleSupplier m_knobDistanceToHub;
+  private double m_distanceMeters;
 
-  public ShooterSubsystem(DoubleSupplier distanceToHub) {
+  public ShooterSubsystem(DoubleSupplier driveDistanceToHub , DoubleSupplier knobDistanceToHub) {
 
-    m_distanceToHub = distanceToHub;
+    m_driveDistanceToHub = driveDistanceToHub;
+    m_knobDistanceToHub = knobDistanceToHub;
     m_shooterController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
     m_shooterConfig = new TalonFXConfiguration();
     m_shooterConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
     m_shooterConfig.OpenLoopRamps.withVoltageOpenLoopRampPeriod(ShooterConstants.kShooterRampRate);
+    m_shooterConfig.CurrentLimits.withStatorCurrentLimit(60);
 
     StatusCode status = StatusCode.StatusCodeNotInitialized;
     //try config up to five times, print if failure
@@ -56,6 +61,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_backwheelConfig = new SparkMaxConfig();
     m_backwheelConfig.inverted(false);
     m_backwheelConfig.openLoopRampRate(ShooterConstants.kShooterRampRate);
+    m_backwheelConfig.smartCurrentLimit(60);
 
     m_backwheelController.configure(m_backwheelConfig , ResetMode.kNoResetSafeParameters , PersistMode.kNoPersistParameters);
   }
@@ -64,9 +70,21 @@ public class ShooterSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     //formula below is using knob on console, will need to be changed when we get distance and camera working
-     m_adjustedThrottle = (((m_distanceToHub.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
+   // m_adjustedThrottle = (((m_driveDistanceToHub.getAsDouble() +1.0) / 2.0) * ShooterConstants.kShooterRange) + ShooterConstants.kShooterMinVoltage;
+    double distanceToHub = 0;
+
+    if(m_driveDistanceToHub.getAsDouble() != 0) {
+      distanceToHub = m_driveDistanceToHub.getAsDouble() * 1.15;
+    } else {
+      distanceToHub = (((m_knobDistanceToHub.getAsDouble() + 1.0) / 2.0) * ShooterConstants.kShooterRangeMeters) + ShooterConstants.kShooterMinMeters;
+    }
+
+   // m_adjustedThrottle = ((distanceToHub - 1.524) / 1.524) + 4.5;
+    m_adjustedThrottle = ((distanceToHub - 1.524) / 1.4) + 4.5;
+
     SmartDashboard.putBoolean("Hub Active" , isHubActive());
     SmartDashboard.putNumber("Shooter Voltage" , m_adjustedThrottle);
+    SmartDashboard.putNumber("Shooter Distance Feet" , Units.metersToFeet(distanceToHub));
     SmartDashboard.putNumber("Shooter Velocity" , m_shooterController.getVelocity().getValueAsDouble());
   }
 
