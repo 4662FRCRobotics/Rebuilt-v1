@@ -16,6 +16,8 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.CameraApriltag.CameraName;
 
+import org.photonvision.PhotonCamera;
+
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.MathUtil;
@@ -64,6 +66,7 @@ public class RobotContainer {
   // new CommandGenericHID(OperatorConstants.kConsoleTeleopPort);
 
   private static boolean m_runAutoConsole;
+  PhotonCamera m_DriveCamera;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -91,6 +94,8 @@ public class RobotContainer {
 
     m_HopperSubsystem.setDefaultCommand(m_HopperSubsystem.gateClosecmd());
 
+    m_DriveCamera = new PhotonCamera("HD_USB_Camera");
+    m_DriveCamera.setDriverMode(true);
 
   }
 
@@ -141,13 +146,13 @@ public class RobotContainer {
      * m_DriveSubsystem));
      */
 
-    m_driverController.leftTrigger()
+    /*m_driverController.leftTrigger()
       .whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
       //.whileTrue(m_IntakeSubsystem.runInCmd());
       //.whileTrue(m_IntakeSubsystem.deployCmd());
 
     m_driverController.leftBumper()
-      .whileTrue(m_IntakeSubsystem.retractCmd());
+      .whileTrue(m_IntakeSubsystem.retractCmd());*/
 
     m_driverController.rightTrigger()
       .whileTrue(m_DriveSubsystem.cmdTurnToHub()
@@ -167,6 +172,10 @@ public class RobotContainer {
 
     m_ConsoleTeleop.button(3)
       .onTrue(m_CameraFront.cmdUseCameraYaw());
+
+    m_ConsoleTeleop.button(4)
+      .onTrue(m_DriveSubsystem.cmdCalibrateGyro());
+
   }
 
   /**

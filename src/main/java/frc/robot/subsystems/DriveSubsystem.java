@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.CameraApriltag.ObjectType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -166,6 +167,8 @@ public class DriveSubsystem extends SubsystemBase {
         getHeading(),
         getModulePositions());
 
+    addVisionMeasurment();
+
     m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
 
     SmartDashboard.putNumber("Gyro", getHeading().getDegrees());
@@ -265,6 +268,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   public DoubleSupplier getDistanceToHub() {
     return () -> m_robotToHubDistancePV;
+  }
+
+  public Command cmdCalibrateGyro() {
+    return Commands.runOnce(() -> m_gyro.calibrate() , this)
+    .ignoringDisable(true);
   }
 
   /**
@@ -413,7 +421,7 @@ public class DriveSubsystem extends SubsystemBase {
     return new PathPlannerAuto(pathName);
   }
 
-  public void addVisionMeasurment() {
+  private void addVisionMeasurment() {
     if (m_CameraFront.hasTarget()) {
       m_poseEstimator.addVisionMeasurement(m_CameraFront.getVisionPose2d(),
           m_CameraFront.getVisionTmst(),
