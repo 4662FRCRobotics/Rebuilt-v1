@@ -197,7 +197,7 @@ public class DriveSubsystem extends SubsystemBase {
         hubY = DriveConstants.kHubRedY;
         hubPose = DriveConstants.kHubRedPose;
         haveTarget = true;
-      } else if ( m_CameraFront.getGamePieceType()==ObjectType.BlueHub) {
+      } else if (alliance.get() == DriverStation.Alliance.Blue && m_CameraFront.getGamePieceType()==ObjectType.BlueHub) {
         hubX = DriveConstants.kHubBlueX;
         hubY = DriveConstants.kHubBlueY;
         hubPose = DriveConstants.kHubBluePose;
