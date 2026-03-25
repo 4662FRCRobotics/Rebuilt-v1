@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.ShooterConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
 
@@ -34,7 +33,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     m_drawbridgeController = new SparkMax(IntakeConstants.kDrawbridgeControllerCanID , MotorType.kBrushless);
     m_drawbridgeConfig = new SparkMaxConfig();
-    m_drawbridgeConfig.inverted(false);
+    m_drawbridgeConfig.inverted(true);
     m_drawbridgeConfig.openLoopRampRate(IntakeConstants.kDrawbridgeRampRate);
     m_drawbridgeConfig.idleMode(IdleMode.kBrake);
     m_drawbridgeConfig.limitSwitch

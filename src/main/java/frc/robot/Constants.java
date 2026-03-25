@@ -141,17 +141,17 @@ public final class Constants {
   public static final class IntakeConstants {
     public static final int kDrawbridgeControllerCanID = 30;
     public static final int kSpinnerControllerCanID = 31;
-    public static final double kDrawbridgeVoltage = 4;
-    public static final double kSpinnerVoltage = 7;
-    public static final double kDrawbridgeRampRate = 0;
+    public static final double kDrawbridgeVoltage = 2;
+    public static final double kSpinnerVoltage = -7;
+    public static final double kDrawbridgeRampRate = .25;
     public static final double kSpinnerRampRate = 0;
   }
 
   public static final class HopperConstants {
-    public static final int kGatePort = 1;
+    //public static final int kGatePort = 1;
     public static final int kAgitatorCanID = 40;
-    public static final double kGateOpenDegrees = 30;
-    public static final double kGateClosedDegrees = 90;
+    //public static final double kGateOpenDegrees = 30;
+    //public static final double kGateClosedDegrees = 90;
     public static final double kGateOpenLagSeconds = 0.6;
   }
 }
