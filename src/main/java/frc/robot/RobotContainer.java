@@ -146,13 +146,13 @@ public class RobotContainer {
      * m_DriveSubsystem));
      */
 
-    /*m_driverController.leftTrigger()
+    m_driverController.leftTrigger()
       .whileTrue(m_IntakeSubsystem.deployCmd().andThen(m_IntakeSubsystem.runInCmd()));
       //.whileTrue(m_IntakeSubsystem.runInCmd());
       //.whileTrue(m_IntakeSubsystem.deployCmd());
 
     m_driverController.leftBumper()
-      .whileTrue(m_IntakeSubsystem.retractCmd());*/
+      .whileTrue(m_IntakeSubsystem.retractCmd());
 
     m_driverController.rightTrigger()
       .whileTrue(m_DriveSubsystem.cmdTurnToHub()
@@ -202,8 +202,9 @@ public class RobotContainer {
   }
 
   public Command shootCmd() {
+    //return m_ShooterSubsystem.shoot();
     return Commands.parallel(m_ShooterSubsystem.shoot() , 
-           Commands.sequence(Commands.waitSeconds(HopperConstants.kGateOpenLagSeconds) , m_HopperSubsystem.gateOpencmd()));
+          Commands.sequence(Commands.waitSeconds(HopperConstants.kGateOpenLagSeconds) , m_HopperSubsystem.gateOpencmd()));
   }
 
 }

@@ -42,7 +42,7 @@ public class ShooterSubsystem extends SubsystemBase {
     m_knobDistanceToHub = knobDistanceToHub;
     m_shooterController = new TalonFX(ShooterConstants.kFlywheelControllerCanId);
     m_shooterConfig = new TalonFXConfiguration();
-    m_shooterConfig.MotorOutput.withInverted(InvertedValue.Clockwise_Positive);
+    m_shooterConfig.MotorOutput.withInverted(InvertedValue.CounterClockwise_Positive);
     m_shooterConfig.OpenLoopRamps.withVoltageOpenLoopRampPeriod(ShooterConstants.kShooterRampRate);
     m_shooterConfig.CurrentLimits.withStatorCurrentLimit(60);
 
@@ -59,7 +59,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     m_backwheelController = new SparkMax(ShooterConstants.kBackwheelControllerCanId , MotorType.kBrushless);
     m_backwheelConfig = new SparkMaxConfig();
-    m_backwheelConfig.inverted(false);
+    m_backwheelConfig.inverted(true);
     m_backwheelConfig.openLoopRampRate(ShooterConstants.kShooterRampRate);
     m_backwheelConfig.smartCurrentLimit(60);
 
