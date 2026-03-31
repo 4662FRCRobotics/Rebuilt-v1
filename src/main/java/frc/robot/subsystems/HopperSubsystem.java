@@ -36,7 +36,7 @@ public class HopperSubsystem extends SubsystemBase {
   public Command gateOpencmd() {
     return Commands.run(() -> { 
    // m_gate.setAngle(HopperConstants.kGateOpenDegrees); 
-    m_agitator.set(TalonSRXControlMode.PercentOutput , 0.6);}
+    m_agitator.set(TalonSRXControlMode.PercentOutput , 0.75);}
     , this);
   }
 
@@ -45,4 +45,8 @@ public class HopperSubsystem extends SubsystemBase {
       m_agitator.set(TalonSRXControlMode.PercentOutput, 0);}
     , this);
   }  
+
+  public Command reverseSpindexer() {
+    return Commands.run(() -> { m_agitator.set(TalonSRXControlMode.PercentOutput , (0.75) * -1);});
+  }
 }

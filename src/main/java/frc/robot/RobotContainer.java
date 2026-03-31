@@ -154,6 +154,9 @@ public class RobotContainer {
     m_driverController.leftBumper()
       .whileTrue(m_IntakeSubsystem.retractCmd());
 
+    m_driverController.y()
+      .whileTrue(m_HopperSubsystem.reverseSpindexer());
+
     m_driverController.rightTrigger()
       .whileTrue(m_DriveSubsystem.cmdTurnToHub()
         .andThen(shootCmd()));

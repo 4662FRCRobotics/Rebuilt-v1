@@ -80,7 +80,9 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
    // m_adjustedThrottle = ((distanceToHub - 1.524) / 1.524) + 4.5;
-    m_adjustedThrottle = ((distanceToHub - 1.524) / 1.4) + 4.5;
+   
+   // formula: height/volts per meter of distance + offset
+    m_adjustedThrottle = ((distanceToHub - 1.524) / 1.2) + 4.7;
 
     SmartDashboard.putBoolean("Hub Active" , isHubActive());
     SmartDashboard.putNumber("Shooter Voltage" , m_adjustedThrottle);
