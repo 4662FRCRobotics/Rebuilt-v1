@@ -47,6 +47,6 @@ public class HopperSubsystem extends SubsystemBase {
   }  
 
   public Command reverseSpindexer() {
-    return Commands.run(() -> { m_agitator.set(TalonSRXControlMode.PercentOutput , (0.75) * -1);});
+    return Commands.run(() -> { m_agitator.set(TalonSRXControlMode.PercentOutput , (0.75) * -1);} , this);
   }
 }
